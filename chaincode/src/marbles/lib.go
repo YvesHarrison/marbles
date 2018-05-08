@@ -63,6 +63,24 @@ func get_owner(stub shim.ChaincodeStubInterface, id string) (Owner, error) {
 	return owner, nil
 }
 
+// ============================================================================================================================
+// Get Owner - get the owner asset from ledger
+// ============================================================================================================================
+func get_account(stub shim.ChaincodeStubInterface, id string) (Owner, error) {
+	var account Account
+	accountAsBytes, err := stub.GetState(id)                     //getState retreives a key/value from the ledger
+	if err != nil {                                            //this seems to always succeed, even if key didn't exist
+		return owner, errors.New("Failed to get account - " + id)
+	}
+	json.Unmarshal(accountAsBytes, &account)                       //un stringify it aka JSON.parse()
+
+	if len(account.Username) == 0 {                              //test if owner is actually here or just nil
+		return account, account.New("Account does not exist - " + id + ", '" + account.Type_ + "' '" )
+	}
+	
+	return account, nil
+}
+
 // ========================================================
 // Input Sanitation - dumb input checking, look for empty strings
 // ========================================================
@@ -71,8 +89,8 @@ func sanitize_arguments(strs []string) error{
 		if len(val) <= 0 {
 			return errors.New("Argument " + strconv.Itoa(i) + " must be a non-empty string")
 		}
-		if len(val) > 32 {
-			return errors.New("Argument " + strconv.Itoa(i) + " must be <= 32 characters")
+		if len(val) > 64 {
+			return errors.New("Argument " + strconv.Itoa(i) + " must be <= 64 characters")
 		}
 	}
 	return nil

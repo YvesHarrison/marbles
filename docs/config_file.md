@@ -1,22 +1,17 @@
 # Configuration
 
-Configuration of marbles happens with two files or one file and a env variable.
-If you set both Marbles will use the env variable over the files.
-If you are unsure which one Marbles is loading check the logs when marbles starts.
-You will either see `Loaded connection profile from an environmental variable` or `Loaded connection profile file <some name here>`.
+Configuration of marbles happens with two files. 
+These files can be found in the folder `<marbles directory>/config`. 
+You usually need to edit them from their default state. 
+Especially the creds file (section 2) since it has the IPs and other network details that are specific to your network. 
 
-A default setup will not have the env variable set, thus Marbles will load the cp from the folder: `<marbles directory>/config/`.
-This is the approach I recommend.
-
-If you are using the files you will likely need to edit them from their default state (more on this in section 2).
-
-**You will need to restart the application after editing either a cp file or env variable.**
+**You will need to restart the application after editing either file.**
 
 ### 1. The Config File:
 
-- This file is small and has settings for the marble company you are pretending to be.
-	- Its got the name of your marbles company, list of marble owners, port for the app, etc..
-- It can be found in `<marbles directory>/config/marbles_tls.json`.
+- This is the file that has settings for the marble company you are pretending to be.
+	- Such as the name of your marbles company, list of marble owners, port for the app, etc.. 
+- It can be found in `<marbles directory>/config/marbles_tls.json`. 
 - You only need to edit/create 1 file. Details below.
 	- Tip: Create a new file for each Marble company you want to pretend to be.
 
@@ -24,7 +19,7 @@ If you are using the files you will likely need to edit them from their default 
 
 ```json
 {
-    "cred_filename": "connection_profile_tls.json",
+    "cred_filename": "blockchain_creds_tls.json",
     "use_events": true,
     "keep_alive_secs": 120,
     "company": "United Marbles",
@@ -35,10 +30,11 @@ If you are using the files you will likely need to edit them from their default 
     ],
     "port": 3001
 }
+
 ```
 
-Your config file must have all the fields listed above.
-There is already an example file in the config folder you can use.
+Your config file must have all the fields listed above. 
+There is already an example file in the config folder you can use. 
 - **Make sure** the `cred_filename` field is set to the correct creds file. (open the creds file and look it over)
 
 **Field Details**
@@ -50,16 +46,15 @@ There is already an example file in the config folder you can use.
 - `usernames` - The list of marbles owners that should be created on initial startup.
 - `port` - The port to use when hosting the marbles application.
 
-### 2. The Connection Profile:
+### 2. The Creds File:
 
-- This data contains the settings for your blockchain network such as IPs, port numbers, and certificates.
-- The file version can be found in `<marbles>/config/connection_profile_tls.json`.
-- If you are using the env version you must set this yourself.
-	- `> export CONNECTION_PROFILE="{JSON GOES IN HERE}"`
-- Tip: Use separate files for separate blockchain networks.
+- This file has settings for your blockchain network such as IPs, port numbers, and certificates. 
+- This can be found in `<marbles>/config/blockchain_creds_tls.json`. 
+- You only need to edit/create 1 file. Details below.
+	- Tip: Use separate files for separate blockchain networks.
 
-**If you are using the IBM Cloud Blockchain Service you will not need to manually edit these files**.
-You should have already downloaded this file from the service during the [install chaincode tutorial](./install_chaincode.md).
+**If you are using the Bluemix Blockchain Service you will not need to manually edit these files**. 
+You should have already downloaded this file from the service during the [install chaincode tutorial](./install_chaincode.md). 
 
 **Example JSON**
 
@@ -73,7 +68,7 @@ You should have already downloaded this file from the service during the [instal
 	"client": {
 		"organization": "Org1MSP",
 		"credentialStore": {
-			"path": "./crypto/example"
+			"path": "./crypto/prebaked"
 		}
 	},
 	"channels": {
@@ -83,12 +78,15 @@ You should have already downloaded this file from the service during the [instal
 			],
 			"peers": {
 				"fabric-peer-org1": {
-					"x-chaincode": {}
+					"endorsingPeer": true,
+					"chaincodeQuery": true,
+					"ledgerQuery": true,
+					"eventSource": true
 				}
 			},
-			"chaincodes": [
-				"marbles:v4"
-			],
+			"chaincodes": {
+				"marbles": "v4"
+			},
 			"x-blockDelay": 10000
 		}
 	},
@@ -102,10 +100,10 @@ You should have already downloaded this file from the service during the [instal
 				"fabric-ca"
 			],
 			"adminPrivateKey": {
-				"path": "./crypto/example/private.pem"
+				"path": "./crypto/prebaked/cd96d5260ad4757551ed4a5a991e62130f8008a0bf996e4e4b84cd097a747fec-priv"
 			},
 			"signedCert": {
-				"path": "./crypto/example/cert.pem",
+				"path": "./crypto/prebaked/PeerAdminCert.pem"
 			}
 		}
 	},
@@ -141,18 +139,16 @@ You should have already downloaded this file from the service during the [instal
 **Field Details**
 
 - `name` - The main purpose of this is to detect when people try to use the default file w/o editing! Set it to anything other than `Place Holder Network Name` to get past the startup check.
-- `x-networkId` - Unique id of the network set by the IBM Blockchain Platform service. Not necessary for a local hyperledger fabric network..
-- `x-type` - Used by Hyperledger Composer to indicate what connector to use. Typically `hlfv1`. Only necessary if using Composer.
 - `client`
-	- `organization` - The name of the org to use for our application. This name will match an entry in the `organizations` object.
+	- `organization` = The name of the org to use for our application. This name will match an entry in the `organizations` object.
 	- `credentialStore` - (Optional)
 		- `path` - The path of a key value store for the SDK to use.  Stores crypto material.
 - `channels`
 	- `orderers` - An array of names of a orderers that have joined this channel. Each name will match an entry in the `orderers` object.
-	- `peers` - A dictionary of peers that has joined this channel.
-	- `chaincodes` - An array of strings representing instantiated chaincode on this channel. The id and version are separated by a colon.
-	- `x-blockDelay` - Time in ms for a block to be created by the orderer. This is a setting for the channel that marbles will use to set timeouts.
-- `organizations`
+	- `peers` - An array of names of peers that has joined this channel. Each name will match an entry in the `peers` object.
+	- `chaincodes` - An object of instantiated chaincode IDs on this channel.  The key is a chaincode id, the value is the chaincode version.
+	- `x-blockDelay` - Time in ms for a block to be created by the orderer. This is a setting for the channel.
+- `organizations` 
 	- `peers` - The key name of a peer that is owned by this org. This name will match an entry in the `peers` object.
 	- `certificateAuthorities` - The key name of a ca that is owned by this org. This name will match an entry in the `certificateAuthorities` object.
 	- `peers` - The key name of a peer that is owned by this org. This name will match an entry in the `peers` object.
@@ -171,9 +167,9 @@ You should have already downloaded this file from the service during the [instal
 	- `url` - The gRPC url to reach the ca. It must include the port.
 	- `registrar` - An object of enroll IDs and secrets for this org.  Used for invokes and queries on chaincode.
 		- `enrollId` - A registered user's id on the CA. Can be found in the CA's yaml file.
-		- `enrollSecret` - A registered user's secret on the CA. Can be found in the CA's yaml file.
+		- `enrollSecret` - A registered user's secret on the CA. Can be found in the CA's yaml file. 
 	- `caName` - The CA to use to authenticate the enroll ID.
 
-Once you have edited `connection_profile_tls.json` you are ready to install/instantiate Marbles.
+Once you have edited `blockchain_creds_tls.json` you are ready to install/instantiate Marbles. 
 
-1. Continue where you left off in the [tutorial](../README.md#installchaincode).
+1. Continue where you left off in the [tutorial](../README.md#installchaincode). 

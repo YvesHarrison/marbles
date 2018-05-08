@@ -10,7 +10,7 @@ var logger = new (winston.Logger)({
 // --- Set Details Here --- //
 var config_file = 'marbles_local.json';							//set config file name
 var chaincode_id = 'marbles01';									//use same ID during the PREVIOUS instantiate proposal
-var chaincode_ver = 'v5';										//use same version during the INSTALL proposal
+var chaincode_ver = 'v9';										//use same version during the INSTALL proposal
 
 //  --- Use (optional) arguments if passed in --- //
 var args = process.argv.slice(2);
@@ -27,8 +27,8 @@ if (args[2]) {
 	logger.debug('Using argument for chaincode version');
 }
 
-var cp = require(path.join(__dirname, '../utils/connection_profile_lib/index.js'))(config_file, logger);			//set the config file name here
-var fcw = require(path.join(__dirname, '../utils/fc_wrangler/index.js'))({ block_delay: cp.getBlockDelay() }, logger);
+var helper = require(path.join(__dirname, '../utils/helper.js'))(config_file, logger);			//set the config file name here
+var fcw = require(path.join(__dirname, '../utils/fc_wrangler/index.js'))({ block_delay: helper.getBlockDelay() }, logger);
 
 console.log('---------------------------------------');
 logger.info('Lets upgrade some chaincode -', chaincode_id, chaincode_ver);
@@ -39,7 +39,7 @@ let msg = `Note: the chaincode "` + chaincode_id + `" and version "` + chaincode
 logger.warn(msg);
 
 logger.info('First we enroll');
-fcw.enrollWithAdminCert(cp.makeEnrollmentOptionsUsingCert(), function (enrollErr, enrollResp) {
+fcw.enrollWithAdminCert(helper.makeEnrollmentOptionsUsingCert(), function (enrollErr, enrollResp) {
 	if (enrollErr != null) {
 		logger.error('error enrolling', enrollErr, enrollResp);
 	} else {
@@ -47,14 +47,14 @@ fcw.enrollWithAdminCert(cp.makeEnrollmentOptionsUsingCert(), function (enrollErr
 		logger.info('Now we upgrade');
 		console.log('---------------------------------------');
 
-		const channel = cp.getChannelId();
-		const first_peer = cp.getFirstPeerName(channel);
+		const channel = helper.getChannelId();
+		const first_peer = helper.getFirstPeerName(channel);
 		var opts = {
-			peer_urls: [cp.getPeersUrl(first_peer)],
-			channel_id: cp.getChannelId(),
+			peer_urls: [helper.getPeersUrl(first_peer)],
+			channel_id: helper.getChannelId(),
 			chaincode_id: chaincode_id,
 			chaincode_version: chaincode_ver,
-			peer_tls_opts: cp.getPeerTlsCertOpts(first_peer),
+			peer_tls_opts: helper.getPeerTlsCertOpts(first_peer),
 			cc_args: ['666666'],
 		};
 		fcw.upgrade_chaincode(enrollResp, opts, function (err, resp) {

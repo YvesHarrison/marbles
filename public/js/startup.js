@@ -1,6 +1,5 @@
 /* global $, document, ws, get_everything_or_else */
 /* exported show_start_up_step */
-var instantSetup = false;
 
 // =================================================================================
 // On Load
@@ -10,14 +9,8 @@ $(document).on('ready', function () {
 	// jQuery UI Events
 	// =================================================================================
 	$('#startSteps').click(function () {
-		showStep1();
-	});
-
-	$('#instantSetup').click(function () {
-		instantSetup = true;
-		$('#instantSetup, #startSteps').prop('disabled', true);
-		$('#stepWelcomeWrap .loadingdiv').show();
-		build_marble_owners();
+		$('#stepWelcomeWrap').hide();
+		$('#stepsWrap, #detailsWrap').fadeIn();
 	});
 
 	$('#showStartupPanel').click(function () {
@@ -56,7 +49,15 @@ $(document).on('ready', function () {
 
 	//register new marble owners
 	$('#registerOwners').click(function () {
-		build_marble_owners();
+		var owners = $('input[name="marbleOwners"]').val();
+		owners = owners.split(',');
+		var obj = {
+			type: 'setup',
+			configure: 'register',
+			build_marble_owners: owners,
+		};
+		console.log('[startup] sending register msg');
+		ws.send(JSON.stringify(obj));
 		$(this).prev('button').html('Next Step');
 	});
 
@@ -68,8 +69,13 @@ $(document).on('ready', function () {
 
 	// ----------------------------- Nav -------------------------------------
 	$('.closeStartUp').click(function () {
-		get_everything_or_else();
-		closeStartUp();
+		$('#startUpPanel').removeClass('bounceInLeft').addClass('slideOutLeft');
+		setTimeout(function () {
+			$('#createPanel, #startUpPanel, #tint').fadeOut();
+		}, 300);
+		setTimeout(function () {
+			$('#startUpPanel').removeClass('slideOutLeft');
+		}, 700);
 	});
 
 	// Show JSON settings for the user on this step
@@ -98,51 +104,17 @@ $(document).on('ready', function () {
 		}
 	});
 
-	$('.showMoreDetails').click(function () {
-		if ($(this).next('.moreDetails').is(':visible')) {
+	$('.showMoreDetails').click(function(){
+		if($(this).next('.moreDetails').is(':visible')){
 			$(this).next('.moreDetails').fadeOut();
 		} else {
 			$(this).next('.moreDetails').fadeIn();
 		}
 	});
 });
-
-
 // =================================================================================
 // Start Up Fun
 // ================================================================================
-
-// build the marble owners
-function build_marble_owners() {
-	var owners = $('input[name="marbleOwners"]').val();
-	owners = owners.split(',');
-	var obj = {
-		type: 'setup',
-		configure: 'register',
-		build_marble_owners: owners,
-	};
-	console.log('[startup] sending register msg');
-	ws.send(JSON.stringify(obj));
-}
-
-// begin the guided step process, show step 1
-function showStep1() {
-	$('#stepWelcomeWrap').hide();
-	$('#stepsWrap, #detailsWrap').fadeIn();
-}
-
-// hide the start up panel
-function closeStartUp() {
-	$('#instantSetup, #startSteps').prop('disabled', false);
-	$('#stepWelcomeWrap .loadingdiv').hide();
-	$('#startUpPanel').removeClass('bounceInLeft').addClass('slideOutLeft');
-	setTimeout(function () {
-		$('#createPanel, #startUpPanel, #tint').fadeOut();
-	}, 300);
-	setTimeout(function () {
-		$('#startUpPanel').removeClass('slideOutLeft');
-	}, 700);
-}
 
 // show the step content and hide the current step content
 function showStepPanel(openStepId) {
@@ -164,6 +136,7 @@ function showStepPanel(openStepId) {
 function show_start_up_step(obj) {
 	var state = obj.state;
 
+	//dsh testing - remove this
 	/*state = {
 		checklist: { state: 'success', step: 'step1' },
 		enrolling: { state: 'success', step: 'step2' },
@@ -206,34 +179,10 @@ function show_start_up_step(obj) {
 		}
 	}
 
-	if (state.find_chaincode.state === 'polling') {				// waiting for chaincode to start or crash
-		$('#instantSetup, #startSteps').prop('disabled', true);
-		$('#stepWelcomeWrap .loadingdiv, #wait4cc, #dateChecked').show();
-		$('#failedSetup').hide();
-		setTimeout(function () {
-			$('#dateChecked').fadeOut(1000);
-		}, 1000);
-	} else if (state.find_chaincode.state === 'failed') {
-		$('#startSteps').prop('disabled', false);					// we can't do instant
-		$('#instantSetup').prop('disabled', true);
-		$('#wait4cc, #dateChecked').hide(1000);
-		$('#failedSetup').fadeIn(500);
-	} else if (state.find_chaincode.state === 'success') {
-		$('#instantSetup, #startSteps').prop('disabled', false);
-		$('#wait4cc, #dateChecked, #failedSetup').hide(1000);
-	}
-
 	if (state.register_owners.state === 'success') {				//last step
 		$('#step5').removeClass('errorStepContent').addClass('success');
 		$('.oneStepWrap[stepid="step5"').removeClass('inactive, errorStepIcon').addClass('successfulStepIcon');
 		$('.oneStepWrap[stepid="step5"').removeClass('inactive');
-
-		if (instantSetup) {
-			closeStartUp();
-			setTimeout(function () {
-				showStep1();
-			}, 1000);
-		}
 	}
 
 	$('#showStartupPanel, #showSettingsPanel').prop('disabled', false);

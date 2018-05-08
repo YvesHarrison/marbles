@@ -69,9 +69,3 @@ fabcar
 hlfv
 prebaked
 repo
-mychannel
-adminpw
-blockchainy
-ZZzzzzzZZZzzzzzzzzZZzZZZZZzzzZZZzzz
-jshash
-csshash

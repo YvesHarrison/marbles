@@ -22,7 +22,7 @@ package main
 import (
 	"fmt"
 	"strconv"
-
+	// "encoding/json"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
@@ -58,6 +58,56 @@ type OwnerRelation struct {
 	Username   string `json:"username"`    //this is mostly cosmetic/handy, the real relation is by Id not Username
 	Company    string `json:"company"`     //this is mostly cosmetic/handy, the real relation is by Id not Company
 }
+
+// var accountStr = "_acIndex"				//name for the key/value that will store a list of all newly created accounts
+// var actradeStr = "_acTradeSet"				//name for the key/value that will store a list of all newly created account trades
+// var acbenchStr = "_acBenchmark"				//name for the key/value that will store a list of all newly created account benchmarks
+// var benchStr = "_benchStr"				//name for the key/value that will store a list of all newly created benchmarks
+
+
+// var store_account = "_storeAc"				//name for the key/value that will store a list of all accepted accounts
+// var store_actrade = "_storeAcTradeSet"				//name for the key/value that will store a list of all accepted account trades
+// var store_acbench = "_storeAcBenchmark"				//name for the key/value that will store a list of all  accepted account benchmarks
+// var store_bench = "_storeBenchStr"				//name for the key/value that will store a list of all accepted benchmarks
+
+// var allStr="_allStr"    // name for all the key/value pair to store in the blockchain, after chekcer accepted 
+
+type Account struct{
+	Type_ string `json:"type_"`	
+	Hash_id string `json:"hash_id"`			
+	//hash string `json:"hash"`
+}
+
+type Ac_trades_setup struct{
+	type_ string `json:"type_"`	
+	hash_id string `json:"hash_id"`				
+	hash string `json:"hash"`
+}
+
+type Ac_benchmark struct{
+	type_ string `json:"type_"`
+	hash_id string `json:"hash_id"`				
+	hash string `json:"hash"`
+}
+
+type Benchmarks struct{
+	type_ string `json:"type_"`
+	hash_id string `json:"hash_id"`				
+	hash string `json:"hash"`
+}
+
+
+// var tmp_account [] string
+// var tmp_tradeset [] string
+// var tmp_allacben [] string
+// var tmp_allbench [] string
+
+
+// var allrecords [] string
+// var hold_account [] string
+// var hold_actrade [] string
+// var hold_acbench [] string
+// var hold_benchmark [] string
 
 // ============================================================================================================================
 // Main
@@ -119,6 +169,46 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
 			if err != nil {
 				return shim.Error(err.Error())                  //self-test fail
 			}
+
+			// var empty []string
+			// jsonAsBytes, _ := json.Marshal(empty)								//marshal an emtpy array of strings to clear the index
+			// err = stub.PutState(accountStr, jsonAsBytes)
+			// if err != nil {
+			// 	return shim.Error(err.Error()) 
+			// }
+			// err = stub.PutState(actradeStr, jsonAsBytes)
+			// if err != nil {
+			// 	return shim.Error(err.Error()) 
+			// }
+			// err = stub.PutState(acbenchStr, jsonAsBytes)
+			// if err != nil {
+			// 	return shim.Error(err.Error()) 
+			// }
+			// err = stub.PutState(benchStr, jsonAsBytes)
+			// if err != nil {
+			// 	return shim.Error(err.Error()) 
+			// }
+	
+			// err = stub.PutState(store_account, jsonAsBytes)
+			// if err != nil {
+			// 	return shim.Error(err.Error()) 
+			// }
+			// err = stub.PutState(store_actrade, jsonAsBytes)
+			// if err != nil {
+			// 	return shim.Error(err.Error()) 
+			// }
+			// err = stub.PutState(store_acbench, jsonAsBytes)
+			// if err != nil {
+			// 	return shim.Error(err.Error()) 
+			// }
+			// err = stub.PutState(store_bench, jsonAsBytes)
+			// if err != nil {
+			// 	return shim.Error(err.Error()) 
+			// }
+			// err = stub.PutState(allStr, jsonAsBytes)
+			// if err != nil {
+			// 	return shim.Error(err.Error()) 
+			// }
 		}
 	}
 
@@ -163,12 +253,28 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return init_owner(stub, args)
 	} else if function == "read_everything"{   //read everything, (owners + marbles + companies)
 		return read_everything(stub)
+	} else if function == "read_account"{   //read everything, (owners + marbles + companies)
+		return read_account(stub)
+	} else if function == "read_ac_trade"{   //read everything, (owners + marbles + companies)
+		return read_ac_trade(stub)
+	} else if function == "read_ac_benchmark"{   //read everything, (owners + marbles + companies)
+		return read_ac_benchmark(stub)
+	} else if function == "read_benchmarks"{   //read everything, (owners + marbles + companies)
+		return read_benchmarks(stub)
 	} else if function == "getHistory"{        //read history of a marble (audit)
 		return getHistory(stub, args)
 	} else if function == "getMarblesByRange"{ //read a bunch of marbles by start and stop id
 		return getMarblesByRange(stub, args)
 	} else if function == "disable_owner"{     //disable a marble owner from appearing on the UI
 		return disable_owner(stub, args)
+	} else if function == "create_account" {									//create a new user
+		return create_account(stub, args)
+	} else if function == "ac_trade_setup" {									//create a new user
+		return ac_trade_setup(stub, args)
+	} else if function == "ac_benchmark" {									//create a new user
+		return ac_benchmark(stub, args)
+	} else if function == "benchmarks" {									//create a new user
+		return benchmarks(stub, args)
 	}
 
 	// error out

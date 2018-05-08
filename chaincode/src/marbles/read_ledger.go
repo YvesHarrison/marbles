@@ -91,14 +91,12 @@ func read(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 // }
 // ============================================================================================================================
 func read_everything(stub shim.ChaincodeStubInterface) pb.Response {
-	type Everything struct {
-		Owners   []Owner   `json:"owners"`
-		Marbles  []Marble  `json:"marbles"`
+	type Everythings struct {
+		Accounts   []Account    `json:"accounts"`
 	}
-	var everything Everything
+	var everything Everythings
 
-	// ---- Get All Marbles ---- //
-	resultsIterator, err := stub.GetStateByRange("m0", "m9999999999999999999")
+	resultsIterator, err := stub.GetStateByRange("00000000000000000000000000000000", "ffffffffffffffffffffffffffffffff")
 	if err != nil {
 		return shim.Error(err.Error())
 	}
@@ -111,37 +109,150 @@ func read_everything(stub shim.ChaincodeStubInterface) pb.Response {
 		}
 		queryKeyAsStr := aKeyValue.Key
 		queryValAsBytes := aKeyValue.Value
-		fmt.Println("on marble id - ", queryKeyAsStr)
-		var marble Marble
-		json.Unmarshal(queryValAsBytes, &marble)                  //un stringify it aka JSON.parse()
-		everything.Marbles = append(everything.Marbles, marble)   //add this marble to the list
+		fmt.Println("on account id - ", queryKeyAsStr)
+		var account Account
+		json.Unmarshal(queryValAsBytes, &account)                  //un stringify it aka JSON.parse()
+		everything.Accounts = append(everything.Accounts, account)   
 	}
-	fmt.Println("marble array - ", everything.Marbles)
+		
+	fmt.Println("marble array - ", everything.Accounts)
+	//change to array of bytes
+	everythingAsBytes, _ := json.Marshal(everything)              //convert to array of bytes
+	return shim.Success(everythingAsBytes)
+}
 
-	// ---- Get All Owners ---- //
-	ownersIterator, err := stub.GetStateByRange("o0", "o9999999999999999999")
+func read_account(stub shim.ChaincodeStubInterface) pb.Response {
+	type Everythings struct {
+		Accounts   []Account    `json:"accounts"`
+	}
+	var everything Everythings
+	
+	resultsIterator, err := stub.GetStateByRange("00000000000000000000000000000000", "ffffffffffffffffffffffffffffffff")
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	defer ownersIterator.Close()
-
-	for ownersIterator.HasNext() {
-		aKeyValue, err := ownersIterator.Next()
+	defer resultsIterator.Close()
+	
+	for resultsIterator.HasNext() {
+		aKeyValue, err := resultsIterator.Next()
 		if err != nil {
 			return shim.Error(err.Error())
 		}
 		queryKeyAsStr := aKeyValue.Key
 		queryValAsBytes := aKeyValue.Value
-		fmt.Println("on owner id - ", queryKeyAsStr)
-		var owner Owner
-		json.Unmarshal(queryValAsBytes, &owner)                   //un stringify it aka JSON.parse()
-
-		if owner.Enabled {                                        //only return enabled owners
-			everything.Owners = append(everything.Owners, owner)  //add this marble to the list
+		fmt.Println("on account id - ", queryKeyAsStr)
+		fmt.Println("on account id - ", queryValAsBytes)
+		fmt.Println("on account id - ", string(queryValAsBytes))
+		var account Account
+		json.Unmarshal(queryValAsBytes, &account)                  //un stringify it aka JSON.parse()
+		fmt.Println("on account id - ", account)
+		fmt.Println("on account id - ", account.Type_)
+		if account.Type_=="account"{
+			everything.Accounts = append(everything.Accounts, account)   
 		}
 	}
-	fmt.Println("owner array - ", everything.Owners)
+		
+	fmt.Println("marble array - ", everything.Accounts)
+	//change to array of bytes
+	everythingAsBytes, _ := json.Marshal(everything)              //convert to array of bytes
+	return shim.Success(everythingAsBytes)
+}
 
+func read_ac_trade(stub shim.ChaincodeStubInterface) pb.Response {
+	type Everythings struct {
+		Accounts   []Account    `json:"accounts"`
+	}
+	var everything Everythings
+
+	resultsIterator, err := stub.GetStateByRange("00000000000000000000000000000000", "ffffffffffffffffffffffffffffffff")
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	defer resultsIterator.Close()
+	
+	for resultsIterator.HasNext() {
+		aKeyValue, err := resultsIterator.Next()
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+		queryKeyAsStr := aKeyValue.Key
+		queryValAsBytes := aKeyValue.Value
+		fmt.Println("on account id - ", queryKeyAsStr)
+		var account Account
+		json.Unmarshal(queryValAsBytes, &account)                  //un stringify it aka JSON.parse()
+		if account.Type_=="ac_trade"{	
+			everything.Accounts = append(everything.Accounts, account)   
+	}
+		
+	fmt.Println("marble array - ", everything.Accounts)
+	//change to array of bytes
+	everythingAsBytes, _ := json.Marshal(everything)              //convert to array of bytes
+	return shim.Success(everythingAsBytes)
+}
+
+func read_ac_benchmark(stub shim.ChaincodeStubInterface) pb.Response {
+	type Everythings struct {
+		Accounts   []Account    `json:"accounts"`
+	}
+	var everything Everythings
+
+	// ---- Get All Marbles ---- //
+	resultsIterator, err := stub.GetStateByRange("00000000000000000000000000000000", "ffffffffffffffffffffffffffffffff")
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	defer resultsIterator.Close()
+	
+	for resultsIterator.HasNext() {
+		aKeyValue, err := resultsIterator.Next()
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+		queryKeyAsStr := aKeyValue.Key
+		queryValAsBytes := aKeyValue.Value
+		fmt.Println("on account id - ", queryKeyAsStr)
+		var account Account
+		json.Unmarshal(queryValAsBytes, &account)                  //un stringify it aka JSON.parse()
+		if account.Type_=="ac_benchmark" {	
+			everything.Accounts = append(everything.Accounts, account)   
+		}
+	}
+		
+	fmt.Println("marble array - ", everything.Accounts)
+	//change to array of bytes
+	everythingAsBytes, _ := json.Marshal(everything)              //convert to array of bytes
+	return shim.Success(everythingAsBytes)
+}
+
+func read_benchmarks(stub shim.ChaincodeStubInterface) pb.Response {
+	type Everythings struct {
+		Accounts   []Account    `json:"accounts"`
+	}
+	var everything Everythings
+
+	// ---- Get All Marbles ---- //
+	resultsIterator, err := stub.GetStateByRange("00000000000000000000000000000000", "ffffffffffffffffffffffffffffffff")
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	defer resultsIterator.Close()
+	
+	for resultsIterator.HasNext() {
+		aKeyValue, err := resultsIterator.Next()
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+		queryKeyAsStr := aKeyValue.Key
+		queryValAsBytes := aKeyValue.Value
+		fmt.Println("on account id - ", queryKeyAsStr)
+		var account Account
+		json.Unmarshal(queryValAsBytes, &account)                  //un stringify it aka JSON.parse()
+		if account.Type_=="benchmarks" {	
+			everything.Accounts = append(everything.Accounts, account)   
+		}
+	}
+		
+	fmt.Println("marble array - ", everything.Accounts)
 	//change to array of bytes
 	everythingAsBytes, _ := json.Marshal(everything)              //convert to array of bytes
 	return shim.Success(everythingAsBytes)

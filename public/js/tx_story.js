@@ -52,7 +52,7 @@ function show_tx_step(obj, cb_orig){
 	}
 
 	setTimeout(function(){													//wait for initial panel fade in
-
+		
 		//1
 		if(state === 'building_proposal'){
 			reset();
@@ -96,7 +96,7 @@ function show_tx_step(obj, cb_orig){
 				$('#txStep1, #txStep2, #txStep3').addClass('stepComplete');
 
 				story4_animation();
-			}, 500);
+			}, 4000);
 		}
 
 		//exit
@@ -196,14 +196,14 @@ function story3_animation(cb){
 		$('#endorseMarbleStable').show();
 		$('.ordererMarbles').fadeIn();
 		setTimeout(function(){
-			$('#orderBoxStable').fadeIn(200);
+			$('#orderBoxStable').fadeIn(500);
 			setTimeout(function(){
 			$('#orderBoxStable').css('border', '2px #fff solid');
 				setTimeout(function(){
 					$('#endorseMarble').hide();
 					if(cb) cb();
-				}, 200);
-			}, 500);
+				}, 500);
+			}, 1000);
 		}, 300);
 	});
 }
@@ -217,7 +217,7 @@ function story4_animation(cb){
 	var dist4 = $('#txStep4 .txStatusWrap .txStatus').offset();
 	var diff = dist4.left - dist3.left;
 
-	$('#orderBox').fadeIn(500);
+	$('#orderBox').fadeIn(1000);
 	setTimeout(function(){
 		setTimeout(function(){
 			$('#orderBox').animate({left: '+=' + diff}, {
@@ -229,7 +229,7 @@ function story4_animation(cb){
 				}
 			});
 		}, 500);
-	}, 500);
+	}, 1000);
 }
 
 //roll a circle right xxx distance

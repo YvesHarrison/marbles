@@ -1,10 +1,5 @@
 //-------------------------------------------------------------------
 // Marbles Chaincode Library
-// - this contains the most interesting code pieces of marbles.
-// - each function is using the FCW library to communicate to the peer/orderer
-// - from here we can interact with our chaincode.
-//   - the cc_function is the chaincode function we will call
-//   - the cc_args are the arguments to pass to your chaincode function
 //-------------------------------------------------------------------
 
 module.exports = function (enrollObj, g_options, fcw, logger) {
@@ -26,7 +21,7 @@ module.exports = function (enrollObj, g_options, fcw, logger) {
 			cc_function: 'read',
 			cc_args: ['selftest']
 		};
-		fcw.query_chaincode(enrollObj, opts, function (err, resp) {  // send a request to our peer
+		fcw.query_chaincode(enrollObj, opts, function (err, resp) {
 			if (err != null) {
 				if (cb) return cb(err, resp);
 			}
@@ -103,6 +98,144 @@ module.exports = function (enrollObj, g_options, fcw, logger) {
 				cb(err, resp);
 			}
 		});
+	};
+
+	marbles_chaincode.create_account = function (options, cb) {
+		console.log('');
+		logger.info('Creating an account...');
+
+		var opts = {
+			peer_urls: g_options.peer_urls,
+			peer_tls_opts: g_options.peer_tls_opts,
+			channel_id: g_options.channel_id,
+			chaincode_id: g_options.chaincode_id,
+			chaincode_version: g_options.chaincode_version,
+			event_urls: g_options.event_urls,
+			endorsed_hook: options.endorsed_hook,
+			ordered_hook: options.ordered_hook,
+			cc_function: 'create_account',
+			cc_args: [
+				options.args.type_,
+				options.args.hash_id,
+				//options.args.hash
+			],
+		};
+		console.log('cc:',options.args.type_,options.args.hash_id);
+		fcw.invoke_chaincode(enrollObj, opts, function (err, resp) {
+			console.log('invoking create_account');
+			if (cb) {
+				if (!resp){
+					console.log('no response');
+					resp = {};
+				} 
+				resp.id = opts.cc_args[1];			//pass marble id back
+				cb(err, resp);
+			}
+		});
+	};
+
+	marbles_chaincode.create_ac_trade = function (options, cb) {
+		console.log('');
+		logger.info('Creating a trade...');
+
+		var opts = {
+			peer_urls: g_options.peer_urls,
+			peer_tls_opts: g_options.peer_tls_opts,
+			channel_id: g_options.channel_id,
+			chaincode_id: g_options.chaincode_id,
+			chaincode_version: g_options.chaincode_version,
+			event_urls: g_options.event_urls,
+			endorsed_hook: options.endorsed_hook,
+			ordered_hook: options.ordered_hook,
+			cc_function: 'ac_trade_setup',
+			cc_args: [
+				options.args.type_,
+				options.args.hash_id,
+				//options.args.hash
+			],
+		};
+		fcw.invoke_chaincode(enrollObj, opts, function (err, resp) {
+			if (cb) {
+				if (!resp) resp = {};
+				resp.id = opts.cc_args[1];			//pass marble id back
+				cb(err, resp);
+			}
+		});
+	};
+
+	marbles_chaincode.create_ac_benchmark = function (options, cb) {
+		console.log('');
+		logger.info('Creating a ac_benchmark...');
+
+		var opts = {
+			peer_urls: g_options.peer_urls,
+			peer_tls_opts: g_options.peer_tls_opts,
+			channel_id: g_options.channel_id,
+			chaincode_id: g_options.chaincode_id,
+			chaincode_version: g_options.chaincode_version,
+			event_urls: g_options.event_urls,
+			endorsed_hook: options.endorsed_hook,
+			ordered_hook: options.ordered_hook,
+			cc_function: 'ac_benchmark',
+			cc_args: [
+				options.args.type_,
+				options.args.hash_id,
+				//options.args.hash
+			],
+		};
+		fcw.invoke_chaincode(enrollObj, opts, function (err, resp) {
+			if (cb) {
+				if (!resp) resp = {};
+				resp.id = opts.cc_args[1];			//pass marble id back
+				cb(err, resp);
+			}
+		});
+	};
+
+	marbles_chaincode.create_benchmark = function (options, cb) {
+		console.log('');
+		logger.info('Creating a benchmark...');
+
+		var opts = {
+			peer_urls: g_options.peer_urls,
+			peer_tls_opts: g_options.peer_tls_opts,
+			channel_id: g_options.channel_id,
+			chaincode_id: g_options.chaincode_id,
+			chaincode_version: g_options.chaincode_version,
+			event_urls: g_options.event_urls,
+			endorsed_hook: options.endorsed_hook,
+			ordered_hook: options.ordered_hook,
+			cc_function: 'benchmarks',
+			cc_args: [
+				options.args.type_,
+				options.args.hash_id,
+				//options.args.hash
+			],
+		};
+		fcw.invoke_chaincode(enrollObj, opts, function (err, resp) {
+			if (cb) {
+				if (!resp) resp = {};
+				resp.id = opts.cc_args[1];			//pass marble id back
+				cb(err, resp);
+			}
+		});
+	};
+
+	//get list of marbles
+	marbles_chaincode.get_marble_list = function (options, cb) {
+		console.log('');
+		logger.info('Fetching marble index list...');
+
+		var opts = {
+			peer_urls: g_options.peer_urls,
+			peer_tls_opts: g_options.peer_tls_opts,
+			channel_id: g_options.channel_id,
+			chaincode_version: g_options.chaincode_version,
+			chaincode_id: g_options.chaincode_id,
+			cc_function: 'compelte_marble_index',
+			cc_args: [' ']
+		};
+		fcw.query_chaincode(enrollObj, opts, cb);
 	};
 
 	//get marble
@@ -325,6 +458,70 @@ module.exports = function (enrollObj, g_options, fcw, logger) {
 		fcw.query_chaincode(enrollObj, opts, cb);
 	};
 
+	marbles_chaincode.read_account = function (options, cb) {
+		console.log('Fetching account...');
+		logger.info('Fetching account...');
+
+		var opts = {
+			peer_urls: g_options.peer_urls,
+			peer_tls_opts: g_options.peer_tls_opts,
+			channel_id: g_options.channel_id,
+			chaincode_version: g_options.chaincode_version,
+			chaincode_id: g_options.chaincode_id,
+			cc_function: 'read_account',
+			cc_args: ['']
+		};
+		fcw.query_chaincode(enrollObj, opts, cb);
+	};
+
+	marbles_chaincode.read_ac_trade = function (options, cb) {
+		console.log('');
+		logger.info('Fetching ac trade...');
+
+		var opts = {
+			peer_urls: g_options.peer_urls,
+			peer_tls_opts: g_options.peer_tls_opts,
+			channel_id: g_options.channel_id,
+			chaincode_version: g_options.chaincode_version,
+			chaincode_id: g_options.chaincode_id,
+			cc_function: 'read_ac_trade',
+			cc_args: ['']
+		};
+		fcw.query_chaincode(enrollObj, opts, cb);
+	};
+
+	marbles_chaincode.read_ac_benchmark = function (options, cb) {
+		console.log('');
+		logger.info('Fetching acbenchmark...');
+
+		var opts = {
+			peer_urls: g_options.peer_urls,
+			peer_tls_opts: g_options.peer_tls_opts,
+			channel_id: g_options.channel_id,
+			chaincode_version: g_options.chaincode_version,
+			chaincode_id: g_options.chaincode_id,
+			cc_function: 'read_ac_benchmark',
+			cc_args: ['']
+		};
+		fcw.query_chaincode(enrollObj, opts, cb);
+	};
+
+	marbles_chaincode.read_benchmarks = function (options, cb) {
+		console.log('');
+		logger.info('Fetching benchmark...');
+
+		var opts = {
+			peer_urls: g_options.peer_urls,
+			peer_tls_opts: g_options.peer_tls_opts,
+			channel_id: g_options.channel_id,
+			chaincode_version: g_options.chaincode_version,
+			chaincode_id: g_options.chaincode_id,
+			cc_function: 'read_benchmarks',
+			cc_args: ['']
+		};
+		fcw.query_chaincode(enrollObj, opts, cb);
+	};
+
 	// get block height of the channel
 	marbles_chaincode.channel_stats = function (options, cb) {
 		var opts = {
@@ -358,3 +555,4 @@ module.exports = function (enrollObj, g_options, fcw, logger) {
 
 	return marbles_chaincode;
 };
+

@@ -1,8 +1,9 @@
-# Drop your admin keys/certs in this folder.
-This is used for install and instantiate.
+# Drop your keys/certs in this folder.
 
 ## Private Key:
+- name the file `privateKey.pem`
 - Contents should include `-----BEGIN PRIVATE KEY-----` and `-----END PRIVATE KEY-----`
 
-## Certificate:
+## Certificate: 
+- name the file `signedCert.pem`
 - Contents should include `-----BEGIN CERTIFICATE-----` and `-----END CERTIFICATE-----`

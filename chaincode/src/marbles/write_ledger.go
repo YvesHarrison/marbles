@@ -354,3 +354,174 @@ func disable_owner(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 	fmt.Println("- end disable_owner")
 	return shim.Success(nil)
 }
+
+func create_account(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	var err error
+	fmt.Println("- start create user")
+	
+	err = sanitize_arguments(args)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	fmt.Println(args[0])
+	fmt.Println(args[1])
+	//var newaccount Account
+	newaccount := Account{}
+	newaccount.Type_= args[0]
+	newaccount.Hash_id= args[1]				
+	//newaccount.hash= args[2]
+	fmt.Println(newaccount.Type_)
+	fmt.Println(newaccount.Hash_id)
+
+	// str := `{
+	// 	"type_":"account", 
+	// 	"hash_id": "` + args[1] + `", 
+	// }`
+	jsonAsBytes, _ := json.Marshal(newaccount)
+	fmt.Println(newaccount)
+	// fmt.Println(str)
+	fmt.Println(jsonAsBytes)
+	
+	err = stub.PutState(newaccount.Hash_id, jsonAsBytes)     
+	// err = stub.PutState(newaccount.hash_id, []byte(str))     
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	fmt.Println("- end create account")
+	return shim.Success(nil)
+
+	// acJson, err := stub.GetState(accountStr)
+	// fmt.Println(acJson)
+	// if err != nil {
+	// 	return shim.Error(err.Error())
+	// }
+	
+	// json.Unmarshal(acJson, &tmp_account)
+	// str_newac, _ := json.Marshal(newaccount)
+	// tmp_account=append(tmp_account, string(str_newac))
+	// jsonAsBytes, _ := json.Marshal(tmp_account)
+	// err = stub.PutState(accountStr, jsonAsBytes)	
+	
+	// fmt.Println("- end create user")
+	// return shim.Success(nil)
+}
+
+func ac_trade_setup(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	var err error
+	fmt.Println("- start create user")
+	
+	err = sanitize_arguments(args)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	//var newaccount Account
+	newaccount := Account{}
+	newaccount.Type_= args[0]
+	newaccount.Hash_id= args[1]	
+	//newaccount.hash= args[2]
+
+	jsonAsBytes, _ := json.Marshal(newaccount)         
+	err = stub.PutState(newaccount.Hash_id, jsonAsBytes)     
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	fmt.Println("- end create account")
+	return shim.Success(nil)
+
+	// acJson, err := stub.GetState(actradeStr)
+	// if err != nil {
+	// 	return shim.Error(err.Error())
+	// }
+	
+	// json.Unmarshal(acJson, &tmp_tradeset)
+	// str_newtra, _ := json.Marshal(newaccount)
+	
+	// tmp_allacben=append(tmp_allacben, string(str_newtra))
+	// jsonAsBytes, _ := json.Marshal(tmp_allacben)
+	// err = stub.PutState(actradeStr, jsonAsBytes)	
+	
+	// fmt.Println("- end create user")
+	// return shim.Success(nil)
+}
+
+func ac_benchmark(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	var err error
+	fmt.Println("- start create user")
+	
+	err = sanitize_arguments(args)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	//var newaccount Account
+	newaccount := Account{}
+	newaccount.Type_= args[0]
+	newaccount.Hash_id= args[1]					
+	//newaccount.hash= args[2]
+
+	jsonAsBytes, _ := json.Marshal(newaccount)         //convert to array of bytes
+	err = stub.PutState(newaccount.Hash_id, jsonAsBytes)     //rewrite the owner
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	fmt.Println("- end create account")
+	return shim.Success(nil)
+
+	// acJson, err := stub.GetState(acbenchStr)
+	// if err != nil {
+	// 	return shim.Error(err.Error())
+	// }
+	
+	// json.Unmarshal(acJson, &tmp_allacben)
+	// str_newacben, _ := json.Marshal(newaccount)
+	
+	// tmp_allacben=append(tmp_allacben, string(str_newacben))
+	// jsonAsBytes, _ := json.Marshal(tmp_allacben)
+	// err = stub.PutState(acbenchStr, jsonAsBytes)	
+	
+	// fmt.Println("- end create user")
+	// return shim.Success(nil)
+}
+
+func benchmarks(stub shim.ChaincodeStubInterface, args []string)pb.Response {
+	var err error
+	fmt.Println("- start create user")
+	
+	err = sanitize_arguments(args)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	//var newaccount Account
+	newaccount := Account{}
+	newaccount.Type_= args[0]
+	newaccount.Hash_id= args[1]					
+	//newaccount.hash= args[2]
+
+	jsonAsBytes, _ := json.Marshal(newaccount)         //convert to array of bytes
+	err = stub.PutState(newaccount.Hash_id, jsonAsBytes)     //rewrite the owner
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	fmt.Println("- end create account")
+	return shim.Success(nil)
+	
+	// acJson, err := stub.GetState(benchStr)
+	// if err != nil {
+	// 	return shim.Error(err.Error())
+	// }
+	
+	// json.Unmarshal(acJson, &tmp_allbench)
+	// str_newbench, _ := json.Marshal(newaccount)
+	// tmp_allbench=append(tmp_allbench, string(str_newbench))
+	// jsonAsBytes, _ := json.Marshal(tmp_allbench)
+	// err = stub.PutState(benchStr, jsonAsBytes)	
+	
+	// fmt.Println("- end create user")
+	// return shim.Success(nil)
+}
