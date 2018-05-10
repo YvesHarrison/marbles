@@ -120,7 +120,6 @@ module.exports = function (enrollObj, g_options, fcw, logger) {
 				//options.args.hash
 			],
 		};
-		console.log('cc:',options.args.type_,options.args.hash_id);
 		fcw.invoke_chaincode(enrollObj, opts, function (err, resp) {
 			console.log('invoking create_account');
 			if (cb) {
@@ -531,6 +530,25 @@ module.exports = function (enrollObj, g_options, fcw, logger) {
 		fcw.query_channel(enrollObj, opts, cb);
 	};
 
+
+	marbles_chaincode.delete_account= function (options, cb) {
+		console.log('');
+		logger.info('Deleting an account...');
+
+		var opts = {
+			peer_urls: g_options.peer_urls,
+			peer_tls_opts: g_options.peer_tls_opts,
+			channel_id: g_options.channel_id,
+			chaincode_id: g_options.chaincode_id,
+			chaincode_version: g_options.chaincode_version,
+			event_urls: g_options.event_urls,
+			endorsed_hook: options.endorsed_hook,
+			ordered_hook: options.ordered_hook,
+			cc_function: 'delete_account',
+			cc_args: [options.args.id,options.args.type_],
+		};
+		fcw.invoke_chaincode(enrollObj, opts, cb);
+	};
 
 	// Other -------------------------------------------------------------------------------
 

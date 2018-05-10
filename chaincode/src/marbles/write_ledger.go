@@ -75,43 +75,7 @@ func write(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 //     id      ,  authed_by_company
 // "m999999999", "united marbles"
 // ============================================================================================================================
-func delete_marble(stub shim.ChaincodeStubInterface, args []string) (pb.Response) {
-	fmt.Println("starting delete_marble")
 
-	if len(args) != 2 {
-		return shim.Error("Incorrect number of arguments. Expecting 2")
-	}
-
-	// input sanitation
-	err := sanitize_arguments(args)
-	if err != nil {
-		return shim.Error(err.Error())
-	}
-
-	id := args[0]
-	authed_by_company := args[1]
-
-	// get the marble
-	marble, err := get_marble(stub, id)
-	if err != nil{
-		fmt.Println("Failed to find marble by id " + id)
-		return shim.Error(err.Error())
-	}
-
-	// check authorizing company (see note in set_owner() about how this is quirky)
-	if marble.Owner.Company != authed_by_company{
-		return shim.Error("The company '" + authed_by_company + "' cannot authorize deletion for '" + marble.Owner.Company + "'.")
-	}
-
-	// remove the marble
-	err = stub.DelState(id)                                                 //remove the key from chaincode state
-	if err != nil {
-		return shim.Error("Failed to delete state")
-	}
-
-	fmt.Println("- end delete_marble")
-	return shim.Success(nil)
-}
 
 // ============================================================================================================================
 // Init Marble - create a new marble, store into chaincode state
@@ -363,24 +327,24 @@ func create_account(stub shim.ChaincodeStubInterface, args []string) pb.Response
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	fmt.Println(args[0])
-	fmt.Println(args[1])
+	
 	//var newaccount Account
 	newaccount := Account{}
 	newaccount.Type_= args[0]
 	newaccount.Hash_id= args[1]				
 	//newaccount.hash= args[2]
-	fmt.Println(newaccount.Type_)
-	fmt.Println(newaccount.Hash_id)
+	
+	_, err = get_account(stub, newaccount.Hash_id)
+	if err == nil {
+		fmt.Println("This account already exists - " + newaccount.Hash_id)
+		return shim.Error("This account already exists - " + newaccount.Hash_id)
+	}
 
 	// str := `{
 	// 	"type_":"account", 
 	// 	"hash_id": "` + args[1] + `", 
 	// }`
 	jsonAsBytes, _ := json.Marshal(newaccount)
-	fmt.Println(newaccount)
-	// fmt.Println(str)
-	fmt.Println(jsonAsBytes)
 	
 	err = stub.PutState(newaccount.Hash_id, jsonAsBytes)     
 	// err = stub.PutState(newaccount.hash_id, []byte(str))     
@@ -422,6 +386,12 @@ func ac_trade_setup(stub shim.ChaincodeStubInterface, args []string) pb.Response
 	newaccount.Hash_id= args[1]	
 	//newaccount.hash= args[2]
 
+	_, err = get_account(stub, newaccount.Hash_id)
+	if err == nil {
+		fmt.Println("This ac_trade already exists - " + newaccount.Hash_id)
+		return shim.Error("This ac_trade already exists - " + newaccount.Hash_id)
+	}
+
 	jsonAsBytes, _ := json.Marshal(newaccount)         
 	err = stub.PutState(newaccount.Hash_id, jsonAsBytes)     
 	if err != nil {
@@ -461,6 +431,12 @@ func ac_benchmark(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	newaccount.Type_= args[0]
 	newaccount.Hash_id= args[1]					
 	//newaccount.hash= args[2]
+
+	_, err = get_account(stub, newaccount.Hash_id)
+	if err == nil {
+		fmt.Println("This ac_benchmark already exists - " + newaccount.Hash_id)
+		return shim.Error("This ac_benchmark already exists - " + newaccount.Hash_id)
+	}
 
 	jsonAsBytes, _ := json.Marshal(newaccount)         //convert to array of bytes
 	err = stub.PutState(newaccount.Hash_id, jsonAsBytes)     //rewrite the owner
@@ -502,6 +478,12 @@ func benchmarks(stub shim.ChaincodeStubInterface, args []string)pb.Response {
 	newaccount.Hash_id= args[1]					
 	//newaccount.hash= args[2]
 
+	_, err = get_account(stub, newaccount.Hash_id)
+	if err == nil {
+		fmt.Println("This benchmark already exists - " + newaccount.Hash_id)
+		return shim.Error("This benchmark already exists - " + newaccount.Hash_id)
+	}
+
 	jsonAsBytes, _ := json.Marshal(newaccount)         //convert to array of bytes
 	err = stub.PutState(newaccount.Hash_id, jsonAsBytes)     //rewrite the owner
 	if err != nil {
@@ -524,4 +506,40 @@ func benchmarks(stub shim.ChaincodeStubInterface, args []string)pb.Response {
 	
 	// fmt.Println("- end create user")
 	// return shim.Success(nil)
+}
+
+func delete_account(stub shim.ChaincodeStubInterface, args []string) (pb.Response) {
+	fmt.Println("starting delete_account")
+
+	if len(args) != 2 {
+		return shim.Error("Incorrect number of arguments. Expecting 2")
+	}
+
+	// input sanitation
+	err := sanitize_arguments(args)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	id := args[0]
+
+	// get the accout
+	account, err := get_account(stub, id)
+	if err != nil{
+		fmt.Println("Failed to find account by id " + id)
+		return shim.Error(err.Error())
+	}
+
+	if(account.Type_!=args[1]){
+		return shim.Error("Deletion for wrong account type")
+	}
+
+	// remove the account
+	err = stub.DelState(id)                                                 //remove the key from chaincode state
+	if err != nil {
+		return shim.Error("Failed to delete state")
+	}
+
+	fmt.Println("- end delete_account")
+	return shim.Success(nil)
 }

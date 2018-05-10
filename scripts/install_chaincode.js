@@ -10,7 +10,7 @@ var logger = new (winston.Logger)({
 // --- Set Details Here --- //
 var config_file = 'marbles_local.json';							//set config file name
 var chaincode_id = 'marbles';									//set desired chaincode id to identify this chaincode
-var chaincode_ver = 'v50';										//set desired chaincode version
+var chaincode_ver = 'v5';										//set desired chaincode version
 
 //  --- Use (optional) arguments if passed in --- //
 var args = process.argv.slice(2);

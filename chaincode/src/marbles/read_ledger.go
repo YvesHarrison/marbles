@@ -141,12 +141,8 @@ func read_account(stub shim.ChaincodeStubInterface) pb.Response {
 		queryKeyAsStr := aKeyValue.Key
 		queryValAsBytes := aKeyValue.Value
 		fmt.Println("on account id - ", queryKeyAsStr)
-		fmt.Println("on account id - ", queryValAsBytes)
-		fmt.Println("on account id - ", string(queryValAsBytes))
 		var account Account
 		json.Unmarshal(queryValAsBytes, &account)                  //un stringify it aka JSON.parse()
-		fmt.Println("on account id - ", account)
-		fmt.Println("on account id - ", account.Type_)
 		if account.Type_=="account"{
 			everything.Accounts = append(everything.Accounts, account)   
 		}
@@ -163,7 +159,7 @@ func read_ac_trade(stub shim.ChaincodeStubInterface) pb.Response {
 		Accounts   []Account    `json:"accounts"`
 	}
 	var everything Everythings
-
+	
 	resultsIterator, err := stub.GetStateByRange("00000000000000000000000000000000", "ffffffffffffffffffffffffffffffff")
 	if err != nil {
 		return shim.Error(err.Error())
@@ -180,8 +176,9 @@ func read_ac_trade(stub shim.ChaincodeStubInterface) pb.Response {
 		fmt.Println("on account id - ", queryKeyAsStr)
 		var account Account
 		json.Unmarshal(queryValAsBytes, &account)                  //un stringify it aka JSON.parse()
-		if account.Type_=="ac_trade"{	
+		if account.Type_=="ac_trade"{
 			everything.Accounts = append(everything.Accounts, account)   
+		}
 	}
 		
 	fmt.Println("marble array - ", everything.Accounts)

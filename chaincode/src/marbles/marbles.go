@@ -243,8 +243,6 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return read(stub, args)
 	} else if function == "write" {            //generic writes to ledger
 		return write(stub, args)
-	} else if function == "delete_marble" {    //deletes a marble from state
-		return delete_marble(stub, args)
 	} else if function == "init_marble" {      //create a new marble
 		return init_marble(stub, args)
 	} else if function == "set_owner" {        //change owner of a marble
@@ -275,8 +273,9 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return ac_benchmark(stub, args)
 	} else if function == "benchmarks" {									//create a new user
 		return benchmarks(stub, args)
+	}else if function == "delete_account" {    //deletes a marble from state
+		return delete_account(stub, args)
 	}
-
 	// error out
 	fmt.Println("Received unknown invoke function name - " + function)
 	return shim.Error("Received unknown invoke function name - '" + function + "'")

@@ -15,7 +15,6 @@ block custom_header
 		
 block navpanel
 	// --------------- Navigation Bar  -------------- //
-	//include ./template/nav.pug
 	include ./template/nav_part1.pug
 	
 block content
@@ -53,13 +52,11 @@ block content
 		//include ./panel_startup.pug
 
 		// --------------- Walk Transaction Panel
-		//include ./panel_tx_story.pug
+		include ./panel_tx_story.pug
 
 		// --------------- Settings Panel
 		//include ./panel_settings.pug
 
-		// --------------- Disable Owner Panel
-		//include ./panel_disable_owner.pug
 		
 block footer
 	include ./template/blockchain.pug

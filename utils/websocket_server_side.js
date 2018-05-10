@@ -168,6 +168,7 @@ module.exports = function (g_options, fcw, logger) {
                     hash_id: sha_id,
 					//hash: sha_value
 			};
+            
             marbles_lib.create_account(options, function (err, resp) {
                 if (err != null) {
                     send_err(err, resp);
@@ -199,7 +200,6 @@ module.exports = function (g_options, fcw, logger) {
                         			console.log('--------------------------SUCCESS INSERT Account----------------------------');
                         			console.log('Last Inserted Row ID: ' + this.lastID);
                         			console.log('Number of Rows Affected: ' + this.changes);
-                        	
                         			console.log('--------------------------------------------------------------------\n\n');
                     			}
                 			});
@@ -230,6 +230,7 @@ module.exports = function (g_options, fcw, logger) {
 			marbles_lib.create_ac_trade(options, function (err, resp) {
 				if (err != null) send_err(err, resp);
 				else{
+                    
 					ws_server.check_for_updates(ws);
 					options.ws.send(JSON.stringify({ msg: 'tx_step', state: 'finished' }));
 					db.serialize(function () {
@@ -246,7 +247,6 @@ module.exports = function (g_options, fcw, logger) {
                         		console.log('--------------------------SUCCESS INSERT Account----------------------------');
                         		console.log('Last Inserted Row ID: ' + this.lastID);
                         		console.log('Number of Rows Affected: ' + this.changes);
-                        	
                         		console.log('--------------------------------------------------------------------\n\n');
                    			}
                 		});
@@ -294,7 +294,6 @@ module.exports = function (g_options, fcw, logger) {
                        			console.log('--------------------------SUCCESS INSERT Account----------------------------');
                         		console.log('Last Inserted Row ID: ' + this.lastID);
                         		console.log('Number of Rows Affected: ' + this.changes);
-                        	
                         		console.log('--------------------------------------------------------------------\n\n');
                     		}
                 		});
@@ -340,7 +339,6 @@ module.exports = function (g_options, fcw, logger) {
                         		console.log('--------------------------SUCCESS INSERT Account----------------------------');
                         		console.log('Last Inserted Row ID: ' + this.lastID);
                         		console.log('Number of Rows Affected: ' + this.changes);
-                        	
                         		console.log('--------------------------------------------------------------------\n\n');
                     		}
                 		});
@@ -707,81 +705,110 @@ module.exports = function (g_options, fcw, logger) {
         	console.log('---------------------------decline the account now--------------------------------');
         	console.log(data.ac_id);
         	var updateSQL = 'update account set flag = -1 where ac_id = ' + '"' + data.ac_id + '"';
-        	db.serialize(function(){
-            	db.run(updateSQL, function(err){
-                	if(err){
-                    	console.log(err);
-                    	throw err;
-                	}
-                	// chaincode.invoke.check_decide(["Account", "decline"]);
-                	console.log("UPDATE Return ==> ");
-                	console.log('Number of Rows Affected: ' + this.changes);
-            	})
-        	});
+            options.args = {
+                id: data.ac_id,
+                type_:'account'
+            };
+
+            marbles_lib.delete_account(options, function (err, resp) {
+                if (err != null) send_err(err, data);
+                else{
+                    db.serialize(function(){
+                        db.run(updateSQL, function(err){
+                            if(err){
+                                console.log(err);
+                                throw err;
+                            }
+                            console.log("UPDATE Return ==> ");
+                            console.log('Number of Rows Affected: ' + this.changes);
+                         })
+                    });
+                    options.ws.send(JSON.stringify({ msg: 'tx_step', state: 'finished' }));
+                } 
+            });
     	}
 
     	else if(data.type == 'actra_decline') {
         	console.log('---------------------------decline the account trade now--------------------------------');
         	console.log(data.ac_id);
         	var updateSQL = 'update ac_trade set flag = -1 where ac_id = ' + '"' + data.ac_id + '"';
-        	db.serialize(function(){
-            	db.run(updateSQL, function(err){
-                	if(err){
-                    	console.log(err);
-                    	throw err;
-                	}
-                	// chaincode.invoke.check_decide(["Ac_trades_setup", "decline"]);
-                	console.log("UPDATE Return ==> ");
-                	console.log('Number of Rows Affected: ' + this.changes);
-            	})
-        	});
+            options.args = {
+                id: data.ac_id,
+                type_:'ac_trade'
+            };
+
+            marbles_lib.delete_account(options, function (err, resp) {
+                if (err != null) send_err(err, data);
+                else{
+                    db.serialize(function(){
+                        db.run(updateSQL, function(err){
+                            if(err){
+                                console.log(err);
+                                throw err;
+                            }
+                            console.log("UPDATE Return ==> ");
+                            console.log('Number of Rows Affected: ' + this.changes);
+                         })
+                    });
+                    options.ws.send(JSON.stringify({ msg: 'tx_step', state: 'finished' }));
+                } 
+            });
     	}
 
     	else if (data.type == 'acben_decline') {
         	console.log('---------------------------decline the account benchmark now--------------------------------');
         	console.log(data.ac_id);
         	var updateSQL = 'update ac_benchmark set flag = -1 where ac_id = ' + '"' + data.ac_id + '"';
-        	db.serialize(function(){
-            	db.run(updateSQL, function(err){
-                	if(err){
-                    	console.log(err);
-                    	throw err;
-                	}
-                	// chaincode.invoke.check_decide(["Ac_benchmark", "decline"]);
-                	console.log("UPDATE Return ==> ");
-                	console.log('Number of Rows Affected: ' + this.changes);
-            	})
-        	});
+            options.args = {
+                id: data.ac_id,
+                type_:'acbenchmark'
+            };
+
+            marbles_lib.delete_account(options, function (err, resp) {
+                if (err != null) send_err(err, data);
+                else{
+                    db.serialize(function(){
+                        db.run(updateSQL, function(err){
+                            if(err){
+                                console.log(err);
+                                throw err;
+                            }
+                            console.log("UPDATE Return ==> ");
+                            console.log('Number of Rows Affected: ' + this.changes);
+                         })
+                    });
+                    options.ws.send(JSON.stringify({ msg: 'tx_step', state: 'finished' }));
+                } 
+            });
     	}
 
     	else if (data.type == 'bench_decline') {
         	console.log('---------------------------decline the benchmarks now--------------------------------');
         	console.log(data.id);
         	var updateSQL = 'update benchmarks set flag = -1 where benchmark_id = ' + '"' +data.id + '"';
-        	db.serialize(function(){
-            	db.run(updateSQL, function(err){
-                	if(err){
-                    	console.log(err);
-                    	throw err;
-                	}
-                	// chaincode.invoke.check_decide(["Benchmarks", "decline"]);
-                	console.log("UPDATE Return ==> ");
-                	console.log('Number of Rows Affected: ' + this.changes);
-            	})
-        	});
+            options.args = {
+                id: data.id,
+                type_:'benchmark'
+            };
+
+            marbles_lib.delete_account(options, function (err, resp) {
+                if (err != null) send_err(err, data);
+                else{
+                    db.serialize(function(){
+                        db.run(updateSQL, function(err){
+                            if(err){
+                                console.log(err);
+                                throw err;
+                            }
+                            console.log("UPDATE Return ==> ");
+                            console.log('Number of Rows Affected: ' + this.changes);
+                         })
+                    });
+                    options.ws.send(JSON.stringify({ msg: 'tx_step', state: 'finished' }));
+                } 
+            });
+        	
     	}
-
-    	// else if(data.type == 'get'){
-     //    	console.log('get user msg');
-     //    	chaincode.query.read(['_allStr'], cb_got_index);
-    	// }
-
-    	// else if(data.type == 'remove'){
-     //    	console.log('removing msg');
-     //    	if(data.name){
-     //        	chaincode.invoke.delete([data.name]);
-     //    	}
-    	// }
 
     	else if(data.type == 'recheck'){
         	console.log("------[recheck now]-------");
@@ -856,42 +883,6 @@ module.exports = function (g_options, fcw, logger) {
         	});
     	}
 
-		
-
-    	function cb_invoked(e, a){
-        	console.log('response: ', e, a);
-    	}
-
-
-    	function formatCCID(i, uuid, ccid){								//flip uuid and ccid if deploy, weird i know
-        	if(i == 1) return uuid;
-        	return ccid;
-    	}
-
-    	function atb(r) {
-        	var e = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-        	var o = String(r).replace(/=+$/, "");
-        	if (o.length % 4 == 1)throw new t("'atob' failed: The string to be decoded is not correctly encoded.");
-        	for (var n, a, i = 0, c = 0, d = ""; a = o.charAt(c++); ~a && (n = i % 4 ? 64 * n + a : a, i++ % 4) ? d += String.fromCharCode(255 & n >> (-2 * i & 6)) : 0)a = e.indexOf(a);
-        	return String(d);
-    	}
-
-    	function formatPayload(str, ccid, flag){								//create a sllliiiggghhhtttlllllyyy better payload name from decoded payload
-        	var func = ['init', 'delete', 'write', 'create_account','ac_trade_setup', 'ac_benchmark', 'benchmarks', 'check_decide'];
-        	str =  str.substring(str.indexOf(ccid) + ccid.length + 4);
-        	if(str.indexOf(func[flag]) >= 0){
-            	return str.substr(func[flag].length);
-        	}
-        	var none='0';
-        	return none;
-    	}
-
-    	function execute(someFunction, value1) {
-        	someFunction(value1);
-    	}
-
-    	
-
 		// send transaction error msg 
 		function send_err(msg, input) {
 			sendMsg({ msg: 'tx_error', e: msg, input: input });
@@ -910,6 +901,10 @@ module.exports = function (g_options, fcw, logger) {
 			}
 		}
 
+        function proposal_hook(err) {
+            if (err) sendMsg({ msg: 'tx_step', state: 'building_proposal_failed' });
+            else sendMsg({ msg: 'tx_step', state: 'endorsing' });
+        }
 		// endorsement stage callback
 		function endorse_hook(err) {
 			if (err) sendMsg({ msg: 'tx_step', state: 'endorsing_failed' });

@@ -66,16 +66,16 @@ func get_owner(stub shim.ChaincodeStubInterface, id string) (Owner, error) {
 // ============================================================================================================================
 // Get Owner - get the owner asset from ledger
 // ============================================================================================================================
-func get_account(stub shim.ChaincodeStubInterface, id string) (Owner, error) {
+func get_account(stub shim.ChaincodeStubInterface, id string) (Account, error) {
 	var account Account
 	accountAsBytes, err := stub.GetState(id)                     //getState retreives a key/value from the ledger
 	if err != nil {                                            //this seems to always succeed, even if key didn't exist
-		return owner, errors.New("Failed to get account - " + id)
+		return account, errors.New("Failed to get account - " + id)
 	}
 	json.Unmarshal(accountAsBytes, &account)                       //un stringify it aka JSON.parse()
 
-	if len(account.Username) == 0 {                              //test if owner is actually here or just nil
-		return account, account.New("Account does not exist - " + id + ", '" + account.Type_ + "' '" )
+	if len(account.Type_) == 0 {                              //test if owner is actually here or just nil
+		return account, errors.New("Account does not exist - " + id + ", '" + account.Type_ + "' '" )
 	}
 	
 	return account, nil

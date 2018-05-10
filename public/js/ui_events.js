@@ -33,7 +33,6 @@ $(document).on('ready', function () {
 	console.log('from local storage', fromLS);
 
 	connect_to_server();
-
 	// =================================================================================
 	// jQuery UI Events
 	// =================================================================================
@@ -271,6 +270,11 @@ $(document).on('ready', function () {
 			console.log('creating user, sending', obj);
 			ws.send(JSON.stringify(obj));
 			showHomePanel();
+			show_tx_step({ state: 'building_proposal' }, function () {
+				$('.colorValue').html('Color');											//reset
+				for (var i in bgcolors) $('.createball').removeClass(bgcolors[i]);		//reset
+				$('.createball').css('border', '2px dashed #fff');						//reset
+			});
 			$('#user1wrap').append("<p>Create [account]:"+obj.ac_id+" [short name]:"+obj.ac_short_name+"</p>");	
 			tmp_account='<div id="acnoti_'+obj.ac_id+'"><p><span style="color:#FF0;">A new account has been created:</span><br>'+
 			"[account]:"+obj.ac_id+"<br>[short name]:"+obj.ac_short_name+
