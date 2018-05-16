@@ -168,7 +168,7 @@ module.exports = function (g_options, fcw, logger) {
                     hash_id: sha_id,
 					//hash: sha_value
 			};
-            
+    
             marbles_lib.create_account(options, function (err, resp) {
                 if (err != null) {
                     send_err(err, resp);
@@ -206,7 +206,7 @@ module.exports = function (g_options, fcw, logger) {
         			});
                     sendMsg({msg: 'new_account', sha_value:sha_id, ac_id:data.ac_id, ac_short_name:data.ac_short_name, status:data.status, term_date:data.term_date,
                             inception_date:data.inception_date, ac_region: data.ac_region, ac_sub_region:data.ac_sub_region, cod_country_domicile:data.cod_country_domicile, liq_method:data.liq_method,
-                            contracting_entity:data.contracting_entity, mgn_entity:data.mgn_entity, ac_legal_name:data.ac_legal_name, manager_name:data.manager_name, cod_ccy_base:row.cod_ccy_base,
+                            contracting_entity:data.contracting_entity, mgn_entity:data.mgn_entity, ac_legal_name:data.ac_legal_name, manager_name:data.manager_name, cod_ccy_base:data.cod_ccy_base,
                             long_name:data.longname, mandate_id:data.mandate_id, client_id:data.client_id, custodian_name:data.custodian_name, sub_mandate_id:data.sub_mandate_id,
                             transfer_agent_name:data.transfer_agent_name, trust_bank:data.trust_bank, re_trust_bank:data.re_trust_bank, last_updated_by:data.last_updated_by,
                             last_approved_by:data.last_approved_by, last_update_date:data.last_update_date});
@@ -467,7 +467,7 @@ module.exports = function (g_options, fcw, logger) {
                         	msg: 'untreated_account',sha_value: row.sha_value,ac_id: row.ac_id,ac_short_name: row.ac_short_name,
                         	status: row.status,term_date: row.term_date,inception_date: row.inception_date,ac_region: row.ac_region,
                         	ac_sub_region: row.ac_sub_region,cod_country_domicile: row.cod_country_domicile,liq_method: row.liq_method,
-                        	contracting_entity: row.contracting_entity,: row.mgn_entity,ac_legal_name: row.ac_legal_name,manager_name: row.manager_name,
+                        	contracting_entity: row.contracting_entity,mgn_entity: row.mgn_entity,ac_legal_name: row.ac_legal_name,manager_name: row.manager_name,
                         	cod_ccy_base: row.cod_ccy_base,long_name: row.longname,mandate_id: row.mandate_id,client_id: row.client_id,
                         	custodian_name: row.custodian_name,sub_mandate_id: row.sub_mandate_id,transfer_agent_name: row.transfer_agent_name,
                         	trust_bank: row.trust_bank,re_trust_bank: row.re_trust_bank,last_updated_by: row.last_updated_by,
@@ -912,10 +912,6 @@ module.exports = function (g_options, fcw, logger) {
 			}
 		}
 
-        function proposal_hook(err) {
-            if (err) sendMsg({ msg: 'tx_step', state: 'building_proposal_failed' });
-            else sendMsg({ msg: 'tx_step', state: 'endorsing' });
-        }
 		// endorsement stage callback
 		function endorse_hook(err) {
 			if (err) sendMsg({ msg: 'tx_step', state: 'endorsing_failed' });

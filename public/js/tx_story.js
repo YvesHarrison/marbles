@@ -61,9 +61,7 @@ function show_tx_step(obj, cb_orig){
 			$('#txStep1, #txStep2, #txStep3, #txStep4').removeClass('stepComplete');//reset
 
 			story1_animation(function(){
-				setTimeout(function(){
-					show_tx_step({state: 'endorsing'}, cb_orig);			//we pass callback to next step!
-				}, 500);
+				show_tx_step({state: 'endorsing'}, cb_orig);			//we pass callback to next step!
 			});
 		}
 

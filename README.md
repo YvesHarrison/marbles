@@ -12,11 +12,11 @@
    Hyperledger Fabric，编写的任何链代码都需要从Hyperledger Fabric声明对链代码shim的调用。因此为了在本地修改、编译链代码，需要在GOPATH下安装fabric代码。如果跳过此步会带来无法在本地编译链代码的风险。但如果不需要对链代码进行修改，仅仅是使用链代码可以跳过本步骤。
    在GOPATH下创建父目录：
 ```
-  GOPATH/src/github.com/hyperledger
+   GOPATH/src/github.com/hyperledger
 ```
    下载合适的Hyperledger Fabric代码到
 ``` 
-  GOPATH/src/github.com/hyperledger/fabric
+   GOPATH/src/github.com/hyperledger/fabric
 ```
    下载地址：https://github.com/hyperledger/fabric/tree/release-1.0 （本程序使用Hyperledger Fabric v1.0.1）
    将此版本代码与你network/Fabric的提交哈希匹配
@@ -27,7 +27,7 @@
 # 6. 
    Docker Compose，用来定义和运行复杂应用的Docker工具，适合组合使用多个容器进行开发的场景，Windows下建议使用pip安装
 ```
-  pip install docker-compose（python 2.7）
+   pip install docker-compose（python 2.7）
 ```
 # 7. 
    安装数据库系统，本安装指南安装的系统代码使用sqlite3，下载地址：http://www.sqlite.org/download.html 下载
@@ -35,68 +35,69 @@
 # 8. 
    下载Fabric samples，提供已经完成编译的区块链网络配置文件和运行脚本
 ```
-    git clone https://github.com/hyperledger/fabric-samples.git
+   git clone https://github.com/hyperledger/fabric-samples.git
 ```
 # 9. 
-   下载超级帐本的Docker容器，下载release-1.0版本，利用脚本下载容器，地址： https://github.com/hyperledger/fabric/tree/release-1.0，下载解压缩后进入父目录输入下列命令
+   下载超级帐本的Docker容器，下载release-1.0版本，利用脚本下载容器，地址： https://github.com/hyperledger/fabric/tree/release-1.0 ，下载解压缩后进入父目录输入下列命令
 ```
-    cd scripts
-	bootstrap-1.0.1.sh
+   cd scripts
+   bootstrap-1.0.1.sh
 ```
 # 10. 
-    打开Docker，进入Fabric samples文件夹使用下述指令启动网络
+   打开Docker，进入Fabric samples文件夹使用下述指令启动网络 
+
 ```
-    cd fabcar
-    startFabric.sh
+   cd fabcar
+   startFabric.sh
 ```
-    在一到二分钟后命令行窗口关闭，运行docker ps命令查看正在运行中的docker容器，输出日志应如下：（图）
-    关闭网络输入如下指令：
+   在一到二分钟后命令行窗口关闭，运行docker ps命令查看正在运行中的docker容器，输出日志应如下：（图）
+   关闭网络输入如下指令：
 ```
-    cd basic-network
-    stop.sh
+   cd basic-network
+   stop.sh
 ```
-    删除整个网络输入如下指令：
+   删除整个网络输入如下指令：
 ```
-    cd basic-network
-    teardown.sh
+   cd basic-network
+   teardown.sh
 ```
-    该脚本删除docker内所有和网络相关的容器，删除后可使用startFabric.sh重新创建网络
+   该脚本删除docker内所有和网络相关的容器，删除后可使用startFabric.sh重新创建网络
 
 # 11. 
-    从GitHub网站下载程序代码到工作目录 
+   从GitHub网站下载程序代码到工作目录 
 ```
-	git clone https://github.com/YvesHarrison/marbles.git
-	cd marbles
+   git clone https://github.com/YvesHarrison/marbles.git
+   cd marbles
 ``` 
 
 # 12.
-	配置数据库，表和属性信息，使用命令：
+   配置数据库，表和属性信息，使用命令：
 ```
-	sqlite3 test.db ".read test.sql"
+   sqlite3 test.db ".read test.sql"
 ```
 # 13.
-	在程序主目录下输入如下命令安装程序npm依赖
+   在程序主目录下输入如下命令安装程序npm依赖
 ```    
-	npm install
+   npm install
 ```
 # 14.
-	安装链代码，将链代码安装到节点的文件系统内，请确保各配置文件和配置脚本中所声明的链代码版本一致
+   安装链代码，将链代码安装到节点的文件系统内，请确保各配置文件和配置脚本中所声明的链代码版本一致
 ```
-	cd scripts
-	node install_chaincode.js
+   cd scripts
+   node install_chaincode.js
 ```
 # 15.
-	实例化链代码，在通道上安装链代码，实例化成功后节点可以调用该链代码
+   实例化链代码，在通道上安装链代码，实例化成功后节点可以调用该链代码
 ```
-	node instantiate_chaincode.js
+   node instantiate_chaincode.js
 ```
 # 系统部署:
 # 16.
-	运行程序，在父目录下运行以下命令：
+   运行程序，在父目录下运行以下命令：
 ```
-	npm install gulp -g
-	npm install sqlite3 -g
-	npm install
-	gulp marbles_local
+   npm install gulp -g
+   npm install sqlite3 -g
+   npm install
+   gulp marbles_local
 ```
 访问localhost：3001查看程序
