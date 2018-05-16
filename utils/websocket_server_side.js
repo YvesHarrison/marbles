@@ -204,6 +204,12 @@ module.exports = function (g_options, fcw, logger) {
                     			}
                 			});
         			});
+                    sendMsg({msg: 'new_account', sha_value:sha_id, ac_id:data.ac_id, ac_short_name:data.ac_short_name, status:data.status, term_date:data.term_date,
+                            inception_date:data.inception_date, ac_region: data.ac_region, ac_sub_region:data.ac_sub_region, cod_country_domicile:data.cod_country_domicile, liq_method:data.liq_method,
+                            contracting_entity:data.contracting_entity, mgn_entity:data.mgn_entity, ac_legal_name:data.ac_legal_name, manager_name:data.manager_name, cod_ccy_base:row.cod_ccy_base,
+                            long_name:data.longname, mandate_id:data.mandate_id, client_id:data.client_id, custodian_name:data.custodian_name, sub_mandate_id:data.sub_mandate_id,
+                            transfer_agent_name:data.transfer_agent_name, trust_bank:data.trust_bank, re_trust_bank:data.re_trust_bank, last_updated_by:data.last_updated_by,
+                            last_approved_by:data.last_approved_by, last_update_date:data.last_update_date});
                 } 
             });
     	}
@@ -251,6 +257,8 @@ module.exports = function (g_options, fcw, logger) {
                    			}
                 		});
         			});
+                    sendMsg({msg: 'new_ac_trade', sha_value:sha_id, ac_id:data.ac_id, lvts:data.lvts, calypso:data.calypso,
+                            aladdin:data.aladdin, trade_start_date:data.trade_start_date, equity:data.equity, fixed_income:data.fixed_income});
 				}			
 			});
     	}
@@ -300,6 +308,8 @@ module.exports = function (g_options, fcw, logger) {
         			});
 				} 			
 			});	
+            sendMsg({msg: 'new_ac_benchmark', sha_value:sha_id, ac_id:data.ac_id, benchmark_id:data.benchmark_id, source:data.source, name:data.name, currency:data.currency,
+                            primary_flag:data.primary_flag, start_date:data.start_date, end_date:data.end_date, benchmark_reference_id:data.benchmark_reference_id, benchmark_reference_id_source:data.benchmark_reference_id_source});
     	}
 
     	//create new benchmarkss
@@ -345,68 +355,88 @@ module.exports = function (g_options, fcw, logger) {
         			});			
 				} 
 			});       	
+           sendMsg({msg: 'new_benchmark', sha_value:sha_id, benchmark_id:data.benchmark_id, id_source:data.id_source, data:arr[i].name, currency:data.currency,
+                            benchmark_reference_id:data.benchmark_reference_id, benchmark_reference_id_source:data.benchmark_reference_id_source});
    		}
 
    		else if (data.type == 'data_view') {
         	console.log('view data');
         	if (data.data_type == 'account'){
-            	var selectSQL = 'select * from `account`';
-            	var arr = [];
-            	connection.query(selectSQL, function(err, rows) {
-               		if (err) throw err;
-                	for (var i = 0; i < rows.length; i++) {
-                    	arr[i] = rows[i];
-                    	//console.log(arr[i]);
-                    	sendMsg({msg: 'account', sha_value:arr[i].sha_value, ac_id:arr[i].ac_id, ac_short_name:arr[i].ac_short_name, status:arr[i].status, term_date:arr[i].term_date,
-                        	inception_date:arr[i].inception_date, ac_region: arr[i].ac_region, ac_sub_region:arr[i].ac_sub_region, cod_country_domicile:arr[i].cod_country_domicile, liq_method:arr[i].liq_method,
-                        	contracting_entity:arr[i].contracting_entity, mgn_entity:arr[i].mgn_entity, ac_legal_name:arr[i].ac_legal_name, manager_name:arr[i].manager_name, cod_ccy_base:arr[i].cod_ccy_base,
-                        	long_name:arr[i].long_name, mandate_id:arr[i].mandate_id, client_id:arr[i].client_id, custodian_name:arr[i].custodian_name, sub_mandate_id:arr[i].sub_mandate_id,
-                        	transfer_agent_name:arr[i].transfer_agent_name, trust_bank:arr[i].trust_bank, re_trust_bank:arr[i].re_trust_bank, last_updated_by:arr[i].last_updated_by,
-                        	last_approved_by:arr[i].last_approved_by, last_update_date:arr[i].last_update_date});
-                	}
-            	});
+            	var selectSQL = 'select * from `account` where flag = 1';
+                db.serialize(function(){
+                // Database#each(sql, [param, ...], [callback], [complete])
+                    // var selectSQL = 'select * from `account` where flag = 0';
+                    db.each(selectSQL, function(err,row){
+                        if(err){
+                            console.log('--------------------------FAIL SELECT Account----------------------------');
+                            console.log('[SELECT ERROR] - ',err.stack);
+                            console.log('--------------------------------------------------------------------\n\n');
+                            throw err;
+                        }
+                        //console.log(row);
+                        sendMsg({
+                            msg: 'account',sha_value: row.sha_value,ac_id: row.ac_id,ac_short_name: row.ac_short_name,status: row.status,term_date: row.term_date,
+                            inception_date: row.inception_date,ac_region: row.ac_region,ac_sub_region: row.ac_sub_region,cod_country_domicile: row.cod_country_domicile,liq_method: row.liq_method,
+                            contracting_entity: row.contracting_entity,mgn_entity: row.mgn_entity,ac_legal_name: row.ac_legal_name,manager_name: row.manager_name,cod_ccy_base: row.cod_ccy_base,long_name: row.longname,mandate_id: row.mandate_id,
+                            client_id: row.client_id,custodian_name: row.custodian_name, sub_mandate_id: row.sub_mandate_id,transfer_agent_name: row.transfer_agent_name,
+                            trust_bank: row.trust_bank,re_trust_bank: row.re_trust_bank,last_updated_by: row.last_updated_by,last_approved_by: row.last_approved_by,last_update_date: row.last_update_date
+                        });
+                    })
+                });
         	}
 
         	else if (data.data_type == 'ac_trade') {
-            	var selectSQL = 'select * from `ac_trade`';
-            	var arr = [];
-            	connection.query(selectSQL, function(err, rows) {
-                	if (err) throw err;
-                	for (var i = 0; i < rows.length; i++) {
-                    	arr[i] = rows[i];
-                    	//console.log(arr[i]);
-                    	sendMsg({msg: 'ac_trade', sha_value:arr[i].sha_value, ac_id:arr[i].ac_id, lvts:arr[i].lvts, calypso:arr[i].calypso,
-                        	aladdin:arr[i].aladdin, trade_start_date:arr[i].trade_start_date, equity:arr[i].equity, fixed_income:arr[i].fixed_income});
-                	}
-            	});
+                var selectSQL = 'select * from `ac_trade` where flag = 1';
+                db.serialize(function(){
+                    // Database#each(sql, [param, ...], [callback], [complete])
+                    db.each(selectSQL, function(err,row){
+                        if(err){
+                            console.log('--------------------------FAIL SELECT Account_Trade----------------------------');
+                            console.log('[SELECT ERROR] - ',err.stack);
+                            console.log('--------------------------------------------------------------------\n\n');
+                            throw err;
+                        }
+                        //console.log(row);
+                        sendMsg({msg: 'ac_trade', sha_value:row.sha_value, ac_id:row.ac_id, lvts:row.lvts, calypso:row.calypso,
+                            aladdin:row.aladdin, trade_start_date:row.trade_start_date, equity:row.equity, fixed_income:row.fixed_income});
+                    })
+                });
         	}
 
         	else if (data.data_type == 'ac_benchmark') {
-            	var selectSQL = 'select * from `ac_benchmark`';
-            	var arr = [];
-            	connection.query(selectSQL, function(err, rows) {
-                	if (err) throw err;
-                	for (var i = 0; i < rows.length; i++) {
-                    	arr[i] = rows[i];
-                    	//console.log(arr[i]);
-                    	sendMsg({msg: 'ac_benchmark', sha_value:arr[i].sha_value, ac_id:arr[i].ac_id, benchmark_id:arr[i].benchmark_id, source:arr[i].source, name:arr[i].name, currency:arr[i].currency,
-                        	primary_flag:arr[i].primary_flag, start_date:arr[i].start_date, end_date:arr[i].end_date, benchmark_reference_id:arr[i].benchmark_reference_id, benchmark_reference_id_source:arr[i].benchmark_reference_id_source});
-                	}
-            	});
+            	var selectSQL = 'select * from `ac_benchmark` where flag = 1';
+                db.serialize(function(){
+                    // Database#each(sql, [param, ...], [callback], [complete])
+                    db.each(selectSQL, function(err,row){
+                        if(err){
+                            console.log('--------------------------FAIL SELECT Account_Benchmark----------------------------');
+                            console.log('[SELECT ERROR] - ',err.stack);
+                            console.log('--------------------------------------------------------------------\n\n');
+                            throw err;
+                        }
+                        //console.log(row);
+                        sendMsg({msg: 'ac_benchmark', sha_value:row.sha_value, ac_id:row.ac_id, benchmark_id:row.benchmark_id, source:row.source, name:row.name, currency:row.currency,
+                            primary_flag:row.primary_flag, start_date:row.start_date, end_date:row.end_date, benchmark_reference_id:row.benchmark_reference_id, benchmark_reference_id_source:row.benchmark_reference_id_source});
+                    })
+                });
         	}
 
         	else if (data.data_type == 'benchmarks') {
-            	var selectSQL = 'select * from `benchmarks`';
-            	var arr = [];
-            	connection.query(selectSQL, function(err, rows) {
-                	if (err) throw err;
-                	for (var i = 0; i < rows.length; i++) {
-                    	arr[i] = rows[i];
-                    	//console.log(arr[i]);
-                    	sendMsg({msg: 'benchmarks', sha_value:arr[i].sha_value, benchmark_id:arr[i].benchmark_id, id_source:arr[i].id_source, name:arr[i].name, currency:arr[i].currency,
-                        	benchmark_reference_id:arr[i].benchmark_reference_id, benchmark_reference_id_source:arr[i].benchmark_reference_id_source});
-                	}
-            	});
+                var selectSQL = 'select * from `benchmarks` where flag = 1';
+                db.serialize(function(){
+                    // Database#each(sql, [param, ...], [callback], [complete])
+                    db.each(selectSQL, function(err,row){
+                        if(err){
+                            console.log('--------------------------FAIL SELECT Benchmarks----------------------------');
+                            console.log('[SELECT ERROR] - ',err.stack);
+                            console.log('--------------------------------------------------------------------\n\n');
+                            throw err;
+                        }
+                        //console.log(row);
+                        sendMsg({msg: 'untreated_benchmarks', sha_value:row.sha_value, benchmark_id:row.benchmark_id, id_source:row.id_source, name:row.name, currency:row.currency,
+                            benchmark_reference_id:row.benchmark_reference_id, benchmark_reference_id_source:row.benchmark_reference_id_source});
+                    })
+                });
         	}
     	}
 
@@ -434,33 +464,14 @@ module.exports = function (g_options, fcw, logger) {
                     	}
                     	//console.log(row);
                     	sendMsg({
-                        	msg: 'untreated_account',
-                        	sha_value: row.sha_value,
-                        	ac_id: row.ac_id,
-                        	ac_short_name: row.ac_short_name,
-                        	status: row.status,
-                        	term_date: row.term_date,
-                        	inception_date: row.inception_date,
-                        	ac_region: row.ac_region,
-                        	ac_sub_region: row.ac_sub_region,
-                        	cod_country_domicile: row.cod_country_domicile,
-                        	liq_method: row.liq_method,
-                        	contracting_entity: row.contracting_entity,
-                        	mgn_entity: row.mgn_entity,
-                        	ac_legal_name: row.ac_legal_name,
-                        	manager_name: row.manager_name,
-                        	cod_ccy_base: row.cod_ccy_base,
-                        	long_name: row.longname,
-                        	mandate_id: row.mandate_id,
-                        	client_id: row.client_id,
-                        	custodian_name: row.custodian_name,
-                        	sub_mandate_id: row.sub_mandate_id,
-                        	transfer_agent_name: row.transfer_agent_name,
-                        	trust_bank: row.trust_bank,
-                        	re_trust_bank: row.re_trust_bank,
-                        	last_updated_by: row.last_updated_by,
-                        	last_approved_by: row.last_approved_by,
-                        	last_update_date: row.last_update_date
+                        	msg: 'untreated_account',sha_value: row.sha_value,ac_id: row.ac_id,ac_short_name: row.ac_short_name,
+                        	status: row.status,term_date: row.term_date,inception_date: row.inception_date,ac_region: row.ac_region,
+                        	ac_sub_region: row.ac_sub_region,cod_country_domicile: row.cod_country_domicile,liq_method: row.liq_method,
+                        	contracting_entity: row.contracting_entity,: row.mgn_entity,ac_legal_name: row.ac_legal_name,manager_name: row.manager_name,
+                        	cod_ccy_base: row.cod_ccy_base,long_name: row.longname,mandate_id: row.mandate_id,client_id: row.client_id,
+                        	custodian_name: row.custodian_name,sub_mandate_id: row.sub_mandate_id,transfer_agent_name: row.transfer_agent_name,
+                        	trust_bank: row.trust_bank,re_trust_bank: row.re_trust_bank,last_updated_by: row.last_updated_by,
+                        	last_approved_by: row.last_approved_by,last_update_date: row.last_update_date
                     	});
                 	})
             	});
@@ -810,78 +821,78 @@ module.exports = function (g_options, fcw, logger) {
         	
     	}
 
-    	else if(data.type == 'recheck'){
-        	console.log("------[recheck now]-------");
-        	var chain_hash = data.chain_hash;
-        	var table = data.table_name;
-        	console.log(data.chain_hash.length);
-        	console.log("--------[someone recheck the "+table+" now------]");
-        	async.eachLimit(chain_hash, 1, function (hash, cb) {
-            	var selectSQL = 'SELECT * FROM '+ table +' WHERE `sha_value` = \'' + hash+'\'';
-            	console.log(selectSQL);
-            	db.serialize(function(){
-                	// Database#each(sql, [param, ...], [callback], [complete])
-                	db.each(selectSQL, function(err,row){
-                    	if(err){throw err;}
-                    	console.log(row);
-                   		var value = "";
-                    	if( table == 'account' ) {
-                        	value = row.ac_id + row.ac_short_name + row.status + row.term_date + row.inception_date + row.ac_region
-                            	+ row.ac_sub_region + row.cod_country_domicile + row.liq_method + row.contracting_entity + row.mgn_entity
-                            	+ row.ac_legal_name + row.manager_name + row.cod_ccy_base + row.longname + row.mandate_id + row.client_id
-                            	+ row.custodian_name + row.sub_mandate_id + row.transfer_agent_name + row.trust_bank + row.re_trust_bank
-                            	+ row.last_updated_by + row.last_approved_by + row.last_update_date;
-                        	console.log("-----[从数据库取出来的]-----"+value);
-                    	}
-                    	else if (table == 'ac_trade') {
-                        	value = row.ac_id + row.lvts + row.calypso + row.aladdin + row.trade_start_date + row.equity + row.fixed_income;
-                        	console.log("-----[从数据库取出来的]-----"+value);
-                    	}
-                    	else if(table == 'ac_benchmark') {
-                        	value = row.ac_id + row.benchmark_id + row.source + row.name + row.currency + row.primary_flag + row.start_date
-                            	+ row.end_date + row.benchmark_reference_id + row.benchmark_reference_id_source;
-                        	console.log("-----[从数据库取出来的]-----"+value);
-                    	}
-                    	else if(table == 'benchmarks') {
-                        	value = row.benchmark_id + row.id_source + row.name + row.currency + row.benchmark_reference_id +
-                            	row.benchmark_reference_id_source;
-                            console.log("-----[从数据库取出来的]-----"+value);
-                    	}
-                    	else{
-                        	console.log("----[Table `" + table + "` does not exist!]-----");
-                    	}
-                    	var sha = new jsSHA("SHA-256", "TEXT");
-                    	sha.update(value);
-                    	var sha_value = sha.getHash("HEX");		// new hash
-                    	console.log("SHA-VALUE: "+sha_value);
-                    	if (sha_value !== hash) {			// data change
-                        	console.log("[HASH IN INDEXING] "+hash);
-                        	console.log("[HASH IN ACCOUNT] "+ sha_value);
-                        	sendMsg({msg: 'validity', table_name: table, sha_value: hash});
-                        	console.log("SHA-VALUE: " + sha_value);
-                    	}
-                    	else {
-                        	console.log("MATCH! NO PROBLEM!");
-                    	}
-                	}, function(err, number){
-                    	if(number==0){// can not find the hash value from the table
-                        	console.log('---fail---CAN NOT FOUND HASH in table '+table);
-                        	sendMsg({
-                            	msg: 'validity',
-                            	table_name: 'unknown',
-                            	show_location: table,
-                            	sha_value: hash
-                        	});
-                    	}
-                	})
-            	});
-            	cb(null);
-        	}, function (err) {
-            	if (err) {
-                	console.error("error");
-            	}
-        	});
-    	}
+    	// else if(data.type == 'recheck'){
+     //    	console.log("------[recheck now]-------");
+     //    	var chain_hash = data.chain_hash;
+     //    	var table = data.table_name;
+     //    	console.log(data.chain_hash.length);
+     //    	console.log("--------[someone recheck the "+table+" now------]");
+     //    	async.eachLimit(chain_hash, 1, function (hash, cb) {
+     //        	var selectSQL = 'SELECT * FROM '+ table +' WHERE `sha_value` = \'' + hash+'\'';
+     //        	console.log(selectSQL);
+     //        	db.serialize(function(){
+     //            	// Database#each(sql, [param, ...], [callback], [complete])
+     //            	db.each(selectSQL, function(err,row){
+     //                	if(err){throw err;}
+     //                	console.log(row);
+     //               		var value = "";
+     //                	if( table == 'account' ) {
+     //                    	value = row.ac_id + row.ac_short_name + row.status + row.term_date + row.inception_date + row.ac_region
+     //                        	+ row.ac_sub_region + row.cod_country_domicile + row.liq_method + row.contracting_entity + row.mgn_entity
+     //                        	+ row.ac_legal_name + row.manager_name + row.cod_ccy_base + row.longname + row.mandate_id + row.client_id
+     //                        	+ row.custodian_name + row.sub_mandate_id + row.transfer_agent_name + row.trust_bank + row.re_trust_bank
+     //                        	+ row.last_updated_by + row.last_approved_by + row.last_update_date;
+     //                    	console.log("-----[从数据库取出来的]-----"+value);
+     //                	}
+     //                	else if (table == 'ac_trade') {
+     //                    	value = row.ac_id + row.lvts + row.calypso + row.aladdin + row.trade_start_date + row.equity + row.fixed_income;
+     //                    	console.log("-----[从数据库取出来的]-----"+value);
+     //                	}
+     //                	else if(table == 'ac_benchmark') {
+     //                    	value = row.ac_id + row.benchmark_id + row.source + row.name + row.currency + row.primary_flag + row.start_date
+     //                        	+ row.end_date + row.benchmark_reference_id + row.benchmark_reference_id_source;
+     //                    	console.log("-----[从数据库取出来的]-----"+value);
+     //                	}
+     //                	else if(table == 'benchmarks') {
+     //                    	value = row.benchmark_id + row.id_source + row.name + row.currency + row.benchmark_reference_id +
+     //                        	row.benchmark_reference_id_source;
+     //                        console.log("-----[从数据库取出来的]-----"+value);
+     //                	}
+     //                	else{
+     //                    	console.log("----[Table `" + table + "` does not exist!]-----");
+     //                	}
+     //                	var sha = new jsSHA("SHA-256", "TEXT");
+     //                	sha.update(value);
+     //                	var sha_value = sha.getHash("HEX");		// new hash
+     //                	console.log("SHA-VALUE: "+sha_value);
+     //                	if (sha_value !== hash) {			// data change
+     //                    	console.log("[HASH IN INDEXING] "+hash);
+     //                    	console.log("[HASH IN ACCOUNT] "+ sha_value);
+     //                    	sendMsg({msg: 'validity', table_name: table, sha_value: hash});
+     //                    	console.log("SHA-VALUE: " + sha_value);
+     //                	}
+     //                	else {
+     //                    	console.log("MATCH! NO PROBLEM!");
+     //                	}
+     //            	}, function(err, number){
+     //                	if(number==0){// can not find the hash value from the table
+     //                    	console.log('---fail---CAN NOT FOUND HASH in table '+table);
+     //                    	sendMsg({
+     //                        	msg: 'validity',
+     //                        	table_name: 'unknown',
+     //                        	show_location: table,
+     //                        	sha_value: hash
+     //                    	});
+     //                	}
+     //            	})
+     //        	});
+     //        	cb(null);
+     //    	}, function (err) {
+     //        	if (err) {
+     //            	console.error("error");
+     //        	}
+     //    	});
+    	// }
 
 		// send transaction error msg 
 		function send_err(msg, input) {

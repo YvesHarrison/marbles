@@ -10,6 +10,10 @@ var wsTxt = '[ws]';
 var pendingTransaction = null;
 var pendingTxDrawing = [];
 
+var tmp_account="";
+var tmp_actrade="";
+var tmp_acbench="";
+var tmp_bench="";
 // =================================================================================
 // Socket Stuff
 // =================================================================================
@@ -186,13 +190,62 @@ function connect_to_server() {
 				new_block(temp);								//send to blockchain.js
 			}
 
+			else if(msgObj.msg === 'new_account'){
+				$('#user1wrap').append("<p>Create [account]:"+msgObj.ac_id+" [short name]:"+msgObj.ac_short_name+"</p>");	
+				tmp_account='<div id="acnoti_'+msgObj.ac_id+'"><p><span style="color:#FF0;">A new account has been created:</span><br>'+
+				"[account]:"+msgObj.ac_id+"<br>[short name]:"+msgObj.ac_short_name+
+				"<br>[status]:"+msgObj.ac_status+"<br>[term date]:"+msgObj.term_date+
+				"<br>[inception date]:"+msgObj.inception_date+"<br>[region]:"+msgObj.ac_region+
+				"<br>[sub region]:"+msgObj.ac_sub_region+"<br>[country domicile]:"+msgObj.cod_country_domicile+
+				"<br>[liq method]:"+msgObj.liq_method+"<br>[contracting entity]:"+msgObj.contracting_entity+
+				"<br>[mgn entity]:"+msgObj.mgn_entity+"<br>[account legal name]:"+msgObj.ac_legal_name+
+				"<br>[manager name]:"+msgObj.manager_name+"<br>[cod_ccy_base]:"+msgObj.cod_ccy_base+
+				"<br>[long name]:"+msgObj.long_name+"<br>[mandate id]:"+msgObj.mandate_id+
+				"<br>[client id]:"+msgObj.client_id+"<br>[custodian name]:"+msgObj.custodian_name+
+				"<br>[sub_mandate_id]:"+msgObj.sub_mandate_id+"<br>[transfer_agent_name]:"+msgObj.transfer_agent_name+
+				"<br>[trust_bank]:"+msgObj.trust_bank+"<br>[re_trust_bank]:"+msgObj.re_trust_bank+
+				"<br>[last_updated_by]:"+msgObj.last_updated_by+"<br>[last_approved_by]:"+msgObj.last_approved_by+
+				"<br>[last_update_date]:"+msgObj.last_update_date+'</p><button type="button" id="del_ac'+msgObj.ac_id+'">delete</button><hr /></div>';
+				$('#ac_history').append(tmp_account);
+			}
+
+			else if(msgObj.msg === 'new_ac_trade'){
+				$('#user1wrap').append("<p>account trades:"+msgObj.ac_id+" [lvts]:"+msgObj.lvts+"</p>");			
+				tmp_actrade='<div id="actranoti_'+msgObj.ac_id+'"><p><span style="color:#FF0;">An account trade has been created:</span><br>'+
+				"[account id]:"+msgObj.ac_id+"<br>[lvts]:"+msgObj.lvts+
+				"<br>[calypso]:"+msgObj.calypso+"<br>[aladdin]:"+msgObj.aladdin+
+				"<br>[trade start date]:"+msgObj.trade_start_date+"<br>[equity]:"+msgObj.equity+
+				'<br>[fixed_income]:'+msgObj.fixed_income+'</p><button type="button" id="del_actra'+msgObj.ac_id+'">delete</button><hr /></div>';
+				$('#actrade_history').append(tmp_actrade);
+			}
+
+			else if(msgObj.msg === 'new_ac_benchmark'){
+				$('#user1wrap').append("<p>account benchmarks:"+msgObj.ac_id+" [benchmark_id]:"+msgObj.benchmark_id+"</p>");		
+		    	tmp_acbench='<div id="acbennoti_'+msgObj.ac_id+'"><p><span style="color:#FF0;">An account benchmark has been created:</span><br>'+
+				"[account id]:"+msgObj.ac_id+"<br>[benchmark_id]:"+msgObj.benchmark_id+
+				"<br>[source]:"+msgObj.source+"<br>[name]:"+msgObj.name+
+				"<br>[currency]:"+msgObj.currency+"<br>[primary_flag]:"+msgObj.primary_flag+
+				"<br>[start_date]:"+msgObj.start_date+"<br>[end_date]:"+msgObj.end_date+
+				"<br>[benchmark_reference_id]:"+msgObj.benchmark_reference_id+"<br>[benchmark_reference_id_source]:"+msgObj.benchmark_reference_id_source
+				+'</p><button type="button" id="del_acben'+msgObj.ac_id+'">delete</button><hr /></div>';
+				$('#acbench_history').append(tmp_acbench);
+			}
+
+			else if(msgObj.msg === 'new_benchmark'){
+				$('#user1wrap').append("<p>benchmarks:"+msgObj.benchmark_id+" [name]:"+msgObj.name+"</p>");		
+			 	tmp_bench='<div id="benchnoti_'+msgObj.benchmark_id+'"><p><span style="color:#FF0;">An account trade has been created:</span><br>'+
+				"[benchmark_id]:"+msgObj.benchmark_id+"<br>[id_source]:"+msgObj.id_source+
+				"<br>[name]:"+msgObj.name+"<br>[currency]:"+msgObj.currency+
+				"<br>[benchmark_reference_id]:"+msgObj.benchmark_reference_id+"<br>[benchmark_reference_id_source]:"+msgObj.benchmark_reference_id_source
+				+'</p><button type="button" id="del_bench'+msgObj.benchmark_id+'">delete</button><hr /></div>';		
+		    	//$('#bench_check_noti').append(tmp_bench);
+				$('#bench_history').append(tmp_bench);
+				//$('#bench_mak_noti').empty();
+			}
+
 			else if(msgObj.msg === 'account'){
 				console.log("accounts from database");
-				var hash = $('input[name="hash1"]').is(':checked');
-				if(hash){
-					console.log('hhh');
-				}
-
+				
 				console.log(msgObj.ac_short_name);
 				var click = {
 						hash: $('input[name="hash1"]').is(':checked'),
@@ -581,18 +634,6 @@ function connect_to_server() {
 				}
             }
 
-            else if(msgObj.msg === 'hash'){
-				console.log("------------------------ENTER THE HASH--------------------");
-				console.log(msgObj.chain_hash);
-                var obj ={
-                    type: 'recheck',
-                    chain_hash: msgObj.chain_hash ,
-					table_name: msgObj.table_name
-                };
-                ws.send(JSON.stringify(obj));
-
-			}
-			
 			//unknown
 			else console.log(wsTxt + ' rec', msgObj.msg, msgObj);
 		}
