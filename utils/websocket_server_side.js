@@ -68,86 +68,10 @@ module.exports = function (g_options, fcw, logger) {
 			return;
 		}
         
-		// create a new marble
-		if (data.type === 'create') {
-			logger.info('[ws] create marbles req');
-			options.args = {
-				color: data.color,
-				size: data.size,
-				marble_owner: data.username,
-				owners_company: data.company,
-				owner_id: data.owner_id,
-				auth_company: process.env.marble_company,
-			};
-
-			marbles_lib.create_a_marble(options, function (err, resp) {
-				if (err != null) send_err(err, data);
-				else options.ws.send(JSON.stringify({ msg: 'tx_step', state: 'finished' }));
-			});
-		}
-
-		// transfer a marble
-		else if (data.type === 'transfer_marble') {
-			logger.info('[ws] transferring req');
-			options.args = {
-				marble_id: data.id,
-				owner_id: data.owner_id,
-				auth_company: process.env.marble_company
-			};
-
-			marbles_lib.set_marble_owner(options, function (err, resp) {
-				if (err != null) send_err(err, data);
-				else options.ws.send(JSON.stringify({ msg: 'tx_step', state: 'finished' }));
-			});
-		}
-
-		// delete marble
-		else if (data.type === 'delete_marble') {
-			logger.info('[ws] delete marble req');
-			options.args = {
-				marble_id: data.id,
-				auth_company: process.env.marble_company
-			};
-
-			marbles_lib.delete_marble(options, function (err, resp) {
-				if (err != null) send_err(err, data);
-				else options.ws.send(JSON.stringify({ msg: 'tx_step', state: 'finished' }));
-			});
-		}
-
-		// get all owners, marbles, & companies
+		// get all accounts
 		else if (data.type === 'read_everything') {
 			logger.info('[ws] read everything req');
 			ws_server.check_for_updates(ws);
-		}
-
-		// get history of marble
-		else if (data.type === 'audit') {
-			if (data.marble_id) {
-				logger.info('[ws] audit history');
-				options.args = {
-					id: data.marble_id,
-				};
-				marbles_lib.get_history(options, function (err, resp) {
-					if (err != null) send_err(err, resp);
-					else options.ws.send(JSON.stringify({ msg: 'history', data: resp }));
-				});
-			}
-		}
-
-		// disable marble owner
-		else if (data.type === 'disable_owner') {
-			if (data.owner_id) {
-				logger.info('[ws] disable owner');
-				options.args = {
-					owner_id: data.owner_id,
-					auth_company: process.env.marble_company
-				};
-				marbles_lib.disable_owner(options, function (err, resp) {
-					if (err != null) send_err(err, resp);
-					else options.ws.send(JSON.stringify({ msg: 'tx_step', state: 'finished' }));
-				});
-			}
 		}
 
 		// create new account 
@@ -328,7 +252,6 @@ module.exports = function (g_options, fcw, logger) {
         	options.args = {
 					type_: 'benchmarks',
                     hash_id: sha_id,
-					//hash: sha_value
 			};
 			marbles_lib.create_benchmark(options, function (err, resp) {
 				if (err != null) send_err(err, resp);
@@ -355,14 +278,14 @@ module.exports = function (g_options, fcw, logger) {
         			});			
 				} 
 			});       	
-           sendMsg({msg: 'new_benchmark', sha_value:sha_id, benchmark_id:data.benchmark_id, id_source:data.id_source, data:arr[i].name, currency:data.currency,
+           sendMsg({msg: 'new_benchmark', sha_value:sha_id, benchmark_id:data.benchmark_id, id_source:data.id_source, name:data.name, currency:data.currency,
                             benchmark_reference_id:data.benchmark_reference_id, benchmark_reference_id_source:data.benchmark_reference_id_source});
    		}
 
    		else if (data.type == 'data_view') {
         	console.log('view data');
         	if (data.data_type == 'account'){
-            	var selectSQL = 'select * from `account` where flag = 1';
+            	var selectSQL = 'select * from `account` where flag = 1 or flag = 2';
                 db.serialize(function(){
                 // Database#each(sql, [param, ...], [callback], [complete])
                     // var selectSQL = 'select * from `account` where flag = 0';
@@ -386,7 +309,7 @@ module.exports = function (g_options, fcw, logger) {
         	}
 
         	else if (data.data_type == 'ac_trade') {
-                var selectSQL = 'select * from `ac_trade` where flag = 1';
+                var selectSQL = 'select * from `ac_trade` where flag = 1 or flag = 2';
                 db.serialize(function(){
                     // Database#each(sql, [param, ...], [callback], [complete])
                     db.each(selectSQL, function(err,row){
@@ -404,7 +327,7 @@ module.exports = function (g_options, fcw, logger) {
         	}
 
         	else if (data.data_type == 'ac_benchmark') {
-            	var selectSQL = 'select * from `ac_benchmark` where flag = 1';
+            	var selectSQL = 'select * from `ac_benchmark` where flag = 1 or flag = 2';
                 db.serialize(function(){
                     // Database#each(sql, [param, ...], [callback], [complete])
                     db.each(selectSQL, function(err,row){
@@ -433,7 +356,7 @@ module.exports = function (g_options, fcw, logger) {
                             throw err;
                         }
                         //console.log(row);
-                        sendMsg({msg: 'untreated_benchmarks', sha_value:row.sha_value, benchmark_id:row.benchmark_id, id_source:row.id_source, name:row.name, currency:row.currency,
+                        sendMsg({msg: 'benchmarks', sha_value:row.sha_value, benchmark_id:row.benchmark_id, id_source:row.id_source, name:row.name, currency:row.currency,
                             benchmark_reference_id:row.benchmark_reference_id, benchmark_reference_id_source:row.benchmark_reference_id_source});
                     })
                 });
@@ -654,7 +577,6 @@ module.exports = function (g_options, fcw, logger) {
                     	console.log(err);
                     	throw err;
                 	}
-                	chaincode.invoke.check_decide(["Account", "accept"]);
                 	console.log("UPDATE Return ==> ");
                 	console.log('Number of Rows Affected: ' + this.changes);
             	})
@@ -671,7 +593,6 @@ module.exports = function (g_options, fcw, logger) {
                     	console.log(err);
                     	throw err;
                 	}
-                	chaincode.invoke.check_decide(["Ac_trades_setup", "accept"]);
                 	console.log("UPDATE Return ==> ");
                 	console.log('Number of Rows Affected: ' + this.changes);
             	})
@@ -688,7 +609,6 @@ module.exports = function (g_options, fcw, logger) {
                     	console.log(err);
                     	throw err;
                 	}
-                	chaincode.invoke.check_decide(["Ac_benchmark", "accept"]);
                 	console.log("UPDATE Return ==> ");
                 	console.log('Number of Rows Affected: ' + this.changes);
             	})
@@ -705,7 +625,6 @@ module.exports = function (g_options, fcw, logger) {
                     	console.log(err);
                     	throw err;
                 	}
-                	// chaincode.invoke.check_decide(["Benchmarks", "accept"]);
                 	console.log("UPDATE Return ==> ");
                 	console.log('Number of Rows Affected: ' + this.changes);
             	})
@@ -715,110 +634,157 @@ module.exports = function (g_options, fcw, logger) {
     	else if(data.type == 'ac_decline') {
         	console.log('---------------------------decline the account now--------------------------------');
         	console.log(data.ac_id);
-        	var updateSQL = 'update account set flag = -1 where ac_id = ' + '"' + data.ac_id + '"';
-            options.args = {
-                id: data.ac_id,
-                type_:'account'
-            };
 
-            marbles_lib.delete_account(options, function (err, resp) {
-                if (err != null) send_err(err, data);
-                else{
-                    db.serialize(function(){
-                        db.run(updateSQL, function(err){
-                            if(err){
-                                console.log(err);
-                                throw err;
-                            }
-                            console.log("UPDATE Return ==> ");
-                            console.log('Number of Rows Affected: ' + this.changes);
-                         })
-                    });
-                    options.ws.send(JSON.stringify({ msg: 'tx_step', state: 'finished' }));
-                } 
+            var selectSQL = 'select sha_value from `account` where ac_id = '+ '"' + data.ac_id + '"';;
+            db.serialize(function(){
+                db.each(selectSQL, function(err,row){
+                        if(err){
+                            console.log('--------------------------FAIL SELECT Account----------------------------');
+                            console.log('[SELECT ERROR] - ',err.stack);
+                            console.log('--------------------------------------------------------------------\n\n');
+                            throw err;
+                        }
+                        var updateSQL = 'update account set flag = -1 where ac_id = ' + '"' + data.ac_id + '"';
+                        options.args = {
+                            id: row.sha_value,
+                            type_:'account'
+                        };
+
+                        marbles_lib.delete_account(options, function (err, resp) {
+                            if (err != null) send_err(err, data);
+                            else{
+                                db.serialize(function(){
+                                    db.run(updateSQL, function(err){
+                                        if(err){
+                                            console.log(err);
+                                            throw err;
+                                        }
+                                        console.log("UPDATE Return ==> ");
+                                        console.log('Number of Rows Affected: ' + this.changes);
+                                    })
+                                });
+                                options.ws.send(JSON.stringify({ msg: 'tx_step', state: 'finished' }));
+                            } 
+                        });
+                })
             });
     	}
 
     	else if(data.type == 'actra_decline') {
         	console.log('---------------------------decline the account trade now--------------------------------');
         	console.log(data.ac_id);
-        	var updateSQL = 'update ac_trade set flag = -1 where ac_id = ' + '"' + data.ac_id + '"';
-            options.args = {
-                id: data.ac_id,
-                type_:'ac_trade'
-            };
+            var selectSQL = 'select sha_value from `ac_trade` where ac_id = '+ '"' + data.ac_id + '"';;
+            db.serialize(function(){
+                    db.each(selectSQL, function(err,row){
+                        if(err){
+                            console.log('--------------------------FAIL SELECT Account----------------------------');
+                            console.log('[SELECT ERROR] - ',err.stack);
+                            console.log('--------------------------------------------------------------------\n\n');
+                            throw err;
+                        }
+                        console.log(row.sha_value);
+                        var updateSQL = 'update ac_trade set flag = -1 where ac_id = ' + '"' + data.ac_id + '"';
+                        options.args = {
+                            id: row.sha_value,
+                            type_:'ac_trade'
+                        };
 
-            marbles_lib.delete_account(options, function (err, resp) {
-                if (err != null) send_err(err, data);
-                else{
-                    db.serialize(function(){
-                        db.run(updateSQL, function(err){
-                            if(err){
-                                console.log(err);
-                                throw err;
-                            }
-                            console.log("UPDATE Return ==> ");
-                            console.log('Number of Rows Affected: ' + this.changes);
-                         })
-                    });
-                    options.ws.send(JSON.stringify({ msg: 'tx_step', state: 'finished' }));
-                } 
+                        marbles_lib.delete_account(options, function (err, resp) {
+                            if (err != null) send_err(err, data);
+                            else{
+                                db.serialize(function(){
+                                    db.run(updateSQL, function(err){
+                                        if(err){
+                                            console.log(err);
+                                            throw err;
+                                        }
+                                        console.log("UPDATE Return ==> ");
+                                        console.log('Number of Rows Affected: ' + this.changes);
+                                    })
+                                });
+                                options.ws.send(JSON.stringify({ msg: 'tx_step', state: 'finished' }));
+                            } 
+                        });
+                })
             });
     	}
 
     	else if (data.type == 'acben_decline') {
         	console.log('---------------------------decline the account benchmark now--------------------------------');
         	console.log(data.ac_id);
-        	var updateSQL = 'update ac_benchmark set flag = -1 where ac_id = ' + '"' + data.ac_id + '"';
-            options.args = {
-                id: data.ac_id,
-                type_:'acbenchmark'
-            };
-
-            marbles_lib.delete_account(options, function (err, resp) {
-                if (err != null) send_err(err, data);
-                else{
-                    db.serialize(function(){
-                        db.run(updateSQL, function(err){
-                            if(err){
-                                console.log(err);
-                                throw err;
-                            }
-                            console.log("UPDATE Return ==> ");
-                            console.log('Number of Rows Affected: ' + this.changes);
-                         })
-                    });
-                    options.ws.send(JSON.stringify({ msg: 'tx_step', state: 'finished' }));
-                } 
+            var selectSQL = 'select sha_value from `ac_benchmark` where ac_id = '+ '"' + data.ac_id + '"';;
+            db.serialize(function(){
+                // Database#each(sql, [param, ...], [callback], [complete])
+                    // var selectSQL = 'select * from `account` where flag = 0';
+                    db.each(selectSQL, function(err,row){
+                        if(err){
+                            console.log('--------------------------FAIL SELECT Account----------------------------');
+                            console.log('[SELECT ERROR] - ',err.stack);
+                            console.log('--------------------------------------------------------------------\n\n');
+                            throw err;
+                        }
+                        var updateSQL = 'update ac_benchmark set flag = -1 where ac_id = ' + '"' + data.ac_id + '"';
+                        options.args = {
+                            id: row.sha_value,
+                            type_:'ac_benchmark'
+                        };
+                        marbles_lib.delete_account(options, function (err, resp) {
+                            if (err != null) send_err(err, data);
+                            else{
+                                db.serialize(function(){
+                                    db.run(updateSQL, function(err){
+                                        if(err){
+                                            console.log(err);
+                                            throw err;
+                                        }
+                                        console.log("UPDATE Return ==> ");
+                                        console.log('Number of Rows Affected: ' + this.changes);
+                                    })
+                                });
+                                options.ws.send(JSON.stringify({ msg: 'tx_step', state: 'finished' }));
+                            } 
+                        });
+                })
             });
     	}
 
     	else if (data.type == 'bench_decline') {
         	console.log('---------------------------decline the benchmarks now--------------------------------');
         	console.log(data.id);
-        	var updateSQL = 'update benchmarks set flag = -1 where benchmark_id = ' + '"' +data.id + '"';
-            options.args = {
-                id: data.id,
-                type_:'benchmark'
-            };
+            var selectSQL = 'select sha_value from `benchmarks` where benchmark_id = '+ '"' + data.id + '"';;
+            db.serialize(function(){
+                    db.each(selectSQL, function(err,row){
+                        if(err){
+                            console.log('--------------------------FAIL SELECT Account----------------------------');
+                            console.log('[SELECT ERROR] - ',err.stack);
+                            console.log('--------------------------------------------------------------------\n\n');
+                            throw err;
+                        }
+                        console.log(row.sha_value);
+                        var updateSQL = 'update benchmarks set flag = -1 where benchmark_id = ' + '"' +data.id + '"';
+                        options.args = {
+                            id: row.sha_value,
+                            type_:'benchmarks'
+                        };
 
-            marbles_lib.delete_account(options, function (err, resp) {
-                if (err != null) send_err(err, data);
-                else{
-                    db.serialize(function(){
-                        db.run(updateSQL, function(err){
-                            if(err){
-                                console.log(err);
-                                throw err;
-                            }
-                            console.log("UPDATE Return ==> ");
-                            console.log('Number of Rows Affected: ' + this.changes);
-                         })
-                    });
-                    options.ws.send(JSON.stringify({ msg: 'tx_step', state: 'finished' }));
-                } 
+                        marbles_lib.delete_account(options, function (err, resp) {
+                            if (err != null) send_err(err, data);
+                            else{
+                                db.serialize(function(){
+                                    db.run(updateSQL, function(err){
+                                        if(err){
+                                            console.log(err);
+                                            throw err;
+                                        }
+                                        console.log("UPDATE Return ==> ");
+                                        console.log('Number of Rows Affected: ' + this.changes);
+                                    })
+                                });
+                                options.ws.send(JSON.stringify({ msg: 'tx_step', state: 'finished' }));
+                            } 
+                        });
+                })
             });
-        	
     	}
 
     	// else if(data.type == 'recheck'){
@@ -1297,59 +1263,6 @@ module.exports = function (g_options, fcw, logger) {
             }
         });
     }
-	// organize the marble owner list
-	function organize_usernames(data) {
-		var ownerList = [];
-		var myUsers = [];
-		for (var i in data) {						//lets reformat it a bit, only need 1 peer's response
-			var temp = {
-				id: data[i].id,
-				username: data[i].username,
-				company: data[i].company
-			};
-			if (temp.company === process.env.marble_company) {
-				myUsers.push(temp);					//these are my companies users
-			}
-			else {
-				ownerList.push(temp);				//everyone else
-			}
-		}
-
-		ownerList = sort_usernames(ownerList);
-		ownerList = myUsers.concat(ownerList);		//my users are first, bring in the others
-		return ownerList;
-	}
-
-    
-
-	//
-	function organize_marbles(allMarbles) {
-		var ret = {};
-		for (var i in allMarbles) {
-			if (!ret[allMarbles[i].owner.username]) {
-				ret[allMarbles[i].owner.username] = {
-					owner_id: allMarbles[i].owner.id,
-					username: allMarbles[i].owner.username,
-					company: allMarbles[i].owner.company,
-					marbles: []
-				};
-			}
-			ret[allMarbles[i].owner.username].marbles.push(allMarbles[i]);
-		}
-		return ret;
-	}
-
-	// alpha sort everyone else
-	function sort_usernames(temp) {
-		temp.sort(function (a, b) {
-			var entryA = a.company + a.username;
-			var entryB = b.company + b.username;
-			if (entryA < entryB) return -1;
-			if (entryA > entryB) return 1;
-			return 0;
-		});
-		return temp;
-	}
 
 	return ws_server;
 };

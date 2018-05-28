@@ -75,12 +75,6 @@ function connect_to_server() {
 				});
 			}
 
-			//marbles
-			else if (msgObj.msg === 'users_marbles') {
-				console.log(wsTxt + ' rec', msgObj.msg, msgObj);
-				populate_users_marbles(msgObj);
-			}
-
 			// block
 			else if (msgObj.msg === 'block') {
 				console.log(wsTxt + ' rec', msgObj.msg, ': ledger blockheight', msgObj.block_height);
@@ -96,14 +90,6 @@ function connect_to_server() {
 				}
 			}
 
-			//marble owners
-			else if (msgObj.msg === 'owners') {
-				console.log(wsTxt + ' rec', msgObj.msg, msgObj);
-				clearTimeout(getEverythingWatchdog);
-				build_user_panels(msgObj.owners);
-				console.log(wsTxt + ' sending get_marbles msg');
-			}
-
 			//transaction error
 			else if (msgObj.msg === 'tx_error') {
 				console.log(wsTxt + ' rec', msgObj.msg, msgObj);
@@ -113,19 +99,6 @@ function connect_to_server() {
 					$('#txStoryErrorTxt').html(err_msg);
 					$('#txStoryErrorWrap').show();
 				}
-			}
-
-			//all marbles sent
-			else if (msgObj.msg === 'all_marbles_sent') {
-				console.log(wsTxt + ' rec', msgObj.msg, msgObj);
-				start_up = false;
-
-				$('.marblesWrap').each(function () {
-					console.log('checking', $(this).attr('owner_id'), $(this).find('.innerMarbleWrap').find('.ball').length);
-					if ($(this).find('.innerMarbleWrap').find('.ball').length === 0) {
-						$(this).find('.noMarblesMsg').show();
-					}
-				});
 			}
 
 			//app startup state
@@ -141,34 +114,6 @@ function connect_to_server() {
 				console.log("ok2");
 				console.log(wsTxt + ' rec', msgObj.msg, msgObj);
 				show_tx_step(msgObj);
-			}
-
-			//tx history
-			else if (msgObj.msg === 'history') {
-				console.log(wsTxt + ' rec', msgObj.msg, msgObj);
-				var built = 0;
-				var x = 0;
-				var count = $('.txDetails').length;
-
-				for(x in pendingTxDrawing) clearTimeout(pendingTxDrawing[x]);
-
-				if (count <= 0) {									//if no tx shown yet, append to back
-					$('.txHistoryWrap').html('');					//clear
-					for (x=msgObj.data.parsed.length-1; x >= 0; x--) {
-						built++;
-						slowBuildtx(msgObj.data.parsed[x], x, built);
-					}
-
-				} else {											//if we already showing tx, prepend to front
-					console.log('skipping tx', count);
-					for (x=msgObj.data.parsed.length-1; x >= count; x--) {
-						var html = build_a_tx(msgObj.data.parsed[x], x);
-						$('.txHistoryWrap').prepend(html);
-						$('.txDetails:first').animate({ opacity: 1, left: 0 }, 600, function () {
-							//after animate
-						});
-					}
-				}
 			}
 
 			//general error
@@ -207,6 +152,7 @@ function connect_to_server() {
 				"<br>[last_updated_by]:"+msgObj.last_updated_by+"<br>[last_approved_by]:"+msgObj.last_approved_by+
 				"<br>[last_update_date]:"+msgObj.last_update_date+'</p><button type="button" id="del_ac'+msgObj.ac_id+'">delete</button><hr /></div>';
 				$('#ac_history').append(tmp_account);
+				$('#user1wrap').append("<p>Create new account:"+msgObj.ac_id+" [short name]:"+msgObj.ac_short_name+"</p>");
 			}
 
 			else if(msgObj.msg === 'new_ac_trade'){
@@ -217,6 +163,7 @@ function connect_to_server() {
 				"<br>[trade start date]:"+msgObj.trade_start_date+"<br>[equity]:"+msgObj.equity+
 				'<br>[fixed_income]:'+msgObj.fixed_income+'</p><button type="button" id="del_actra'+msgObj.ac_id+'">delete</button><hr /></div>';
 				$('#actrade_history').append(tmp_actrade);
+				$('#user1wrap').append("<p>Create new ac_trade:"+msgObj.ac_id+" [lvts]:"+msgObj.lvts+"</p>");
 			}
 
 			else if(msgObj.msg === 'new_ac_benchmark'){
@@ -229,6 +176,7 @@ function connect_to_server() {
 				"<br>[benchmark_reference_id]:"+msgObj.benchmark_reference_id+"<br>[benchmark_reference_id_source]:"+msgObj.benchmark_reference_id_source
 				+'</p><button type="button" id="del_acben'+msgObj.ac_id+'">delete</button><hr /></div>';
 				$('#acbench_history').append(tmp_acbench);
+				$('#user1wrap').append("<p>Create new ac_benchmark:"+msgObj.ac_id+" [benchmark id]:"+msgObj.benchmark_id+"</p>");
 			}
 
 			else if(msgObj.msg === 'new_benchmark'){
@@ -237,10 +185,9 @@ function connect_to_server() {
 				"[benchmark_id]:"+msgObj.benchmark_id+"<br>[id_source]:"+msgObj.id_source+
 				"<br>[name]:"+msgObj.name+"<br>[currency]:"+msgObj.currency+
 				"<br>[benchmark_reference_id]:"+msgObj.benchmark_reference_id+"<br>[benchmark_reference_id_source]:"+msgObj.benchmark_reference_id_source
-				+'</p><button type="button" id="del_bench'+msgObj.benchmark_id+'">delete</button><hr /></div>';		
-		    	//$('#bench_check_noti').append(tmp_bench);
+				+'</p><button type="button" id="del_bench'+msgObj.benchmark_id+'">delete</button><hr /></div>';	
 				$('#bench_history').append(tmp_bench);
-				//$('#bench_mak_noti').empty();
+				$('#user1wrap').append("<p>Create new be nchmark:"+msgObj.benchmark_id+" [name]:"+msgObj.name+"</p>");
 			}
 
 			else if(msgObj.msg === 'account'){

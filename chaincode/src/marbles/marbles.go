@@ -243,35 +243,23 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return read(stub, args)
 	} else if function == "write" {            //generic writes to ledger
 		return write(stub, args)
-	} else if function == "init_marble" {      //create a new marble
-		return init_marble(stub, args)
-	} else if function == "set_owner" {        //change owner of a marble
-		return set_owner(stub, args)
-	} else if function == "init_owner"{        //create a new marble owner
-		return init_owner(stub, args)
-	} else if function == "read_everything"{   //read everything, (owners + marbles + companies)
+	}  else if function == "read_everything"{   
 		return read_everything(stub)
-	} else if function == "read_account"{   //read everything, (owners + marbles + companies)
+	} else if function == "read_account"{   
 		return read_account(stub)
-	} else if function == "read_ac_trade"{   //read everything, (owners + marbles + companies)
+	} else if function == "read_ac_trade"{  
 		return read_ac_trade(stub)
-	} else if function == "read_ac_benchmark"{   //read everything, (owners + marbles + companies)
+	} else if function == "read_ac_benchmark"{   
 		return read_ac_benchmark(stub)
-	} else if function == "read_benchmarks"{   //read everything, (owners + marbles + companies)
+	} else if function == "read_benchmarks"{   
 		return read_benchmarks(stub)
-	} else if function == "getHistory"{        //read history of a marble (audit)
-		return getHistory(stub, args)
-	} else if function == "getMarblesByRange"{ //read a bunch of marbles by start and stop id
-		return getMarblesByRange(stub, args)
-	} else if function == "disable_owner"{     //disable a marble owner from appearing on the UI
-		return disable_owner(stub, args)
-	} else if function == "create_account" {									//create a new user
+	} else if function == "create_account" {									
 		return create_account(stub, args)
-	} else if function == "ac_trade_setup" {									//create a new user
+	} else if function == "ac_trade_setup" {									
 		return ac_trade_setup(stub, args)
-	} else if function == "ac_benchmark" {									//create a new user
+	} else if function == "ac_benchmark" {									
 		return ac_benchmark(stub, args)
-	} else if function == "benchmarks" {									//create a new user
+	} else if function == "benchmarks" {									
 		return benchmarks(stub, args)
 	}else if function == "delete_account" {    //deletes a marble from state
 		return delete_account(stub, args)

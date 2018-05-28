@@ -32,121 +32,7 @@ $(document).on('ready', function () {
 	// =================================================================================
 	// jQuery UI Events
 	// =================================================================================
-	$('#createMarbleButton').click(function () {
-		console.log('creating marble');
-		var obj = {
-			type: 'create',
-			color: $('.colorSelected').attr('color'),
-			size: $('select[name="size"]').val(),
-			username: $('select[name="user"]').val(),
-			company: $('input[name="company"]').val(),
-			owner_id: $('input[name="owner_id"]').val(),
-			v: 1
-		};
-		console.log('creating marble, sending', obj);
-		$('#createPanel').fadeOut();
-		$('#tint').fadeOut();
-
-		show_tx_step({ state: 'building_proposal' }, function () {
-			ws.send(JSON.stringify(obj));
-
-			refreshHomePanel();
-			$('.colorValue').html('Color');											//reset
-			for (var i in bgcolors) $('.createball').removeClass(bgcolors[i]);		//reset
-			$('.createball').css('border', '2px dashed #fff');						//reset
-		});
-
-		return false;
-	});
-
-	//fix marble owner panel (don't filter/hide it)
-	$(document).on('click', '.marblesFix', function () {
-		if ($(this).parent().parent().hasClass('marblesFixed')) {
-			$(this).parent().parent().removeClass('marblesFixed');
-		}
-		else {
-			$(this).parent().parent().addClass('marblesFixed');
-		}
-	});
-
-	//marble color picker
-	$(document).on('click', '.colorInput', function () {
-		$('.colorOptionsWrap').hide();											//hide any others
-		$(this).parent().find('.colorOptionsWrap').show();
-	});
-	$(document).on('click', '.colorOption', function () {
-		var color = $(this).attr('color');
-		var html = '<span class="fa fa-circle colorSelected ' + color + '" color="' + color + '"></span>';
-
-		$(this).parent().parent().find('.colorValue').html(html);
-		$(this).parent().hide();
-
-		for (var i in bgcolors) $('.createball').removeClass(bgcolors[i]);		//remove prev color
-		$('.createball').css('border', '0').addClass(color + 'bg');				//set new color
-	});
-
-	//username/company search
-	$('#searchUsers').keyup(function () {
-		var count = 0;
-		var input = $(this).val().toLowerCase();
-		for (var i in known_companies) {
-			known_companies[i].visible = 0;
-		}
-
-		//reset - clear search
-		if (input === '') {
-			$('.marblesWrap').show();
-			count = $('#totalUsers').html();
-			$('.companyPanel').fadeIn();
-			for (i in known_companies) {
-				known_companies[i].visible = known_companies[i].count;
-				$('.companyPanel[company="' + i + '"]').find('.companyVisible').html(known_companies[i].visible);
-				$('.companyPanel[company="' + i + '"]').find('.companyCount').html(known_companies[i].count);
-			}
-		}
-		else {
-			var parts = input.split(',');
-			console.log('searching on', parts);
-
-			//figure out if the user matches the search
-			$('.marblesWrap').each(function () {												//iter on each marble user wrap
-				var username = $(this).attr('username');
-				var company = $(this).attr('company');
-				if (username && company) {
-					var full = (username + company).toLowerCase();
-					var show = false;
-
-					for (var x in parts) {													//iter on each search term
-						if (parts[x].trim() === '') continue;
-						if (full.indexOf(parts[x].trim()) >= 0 || $(this).hasClass('marblesFixed')) {
-							count++;
-							show = true;
-							known_companies[company].visible++;								//this user is visible
-							break;
-						}
-					}
-
-					if (show) $(this).show();
-					else $(this).hide();
-				}
-			});
-
-			//show/hide the company panels
-			for (i in known_companies) {
-				$('.companyPanel[company="' + i + '"]').find('.companyVisible').html(known_companies[i].visible);
-				if (known_companies[i].visible === 0) {
-					console.log('hiding company', i);
-					$('.companyPanel[company="' + i + '"]').fadeOut();
-				}
-				else {
-					$('.companyPanel[company="' + i + '"]').fadeIn();
-				}
-			}
-		}
-		//user count
-		$('#foundUsers').html(count);
-	});
-
+	
 	//login events
 	$('#whoAmI').click(function () {													//drop down for login
 		if ($('#userSelect').is(':visible')) {
@@ -207,29 +93,6 @@ $(document).on('ready', function () {
 	});
 	$('#enableStoryMode').click(function () {
 		set_story_mode('on');
-	});
-
-	//close create panel
-	$('#closeCreate').click(function () {
-		$('#createPanel, #tint').fadeOut();
-	});
-
-	//change size of marble
-	$('select[name="size"]').click(function () {
-		var size = $(this).val();
-		if (size === '16') $('.createball').animate({ 'height': 150, 'width': 150 }, { duration: 200 });
-		else $('.createball').animate({ 'height': 250, 'width': 250 }, { duration: 200 });
-	});
-
-	//right click opens audit on marble
-	$(document).on('contextmenu', '.ball', function () {
-		auditMarble(this, true);
-		return false;
-	});
-
-	//left click audits marble
-	$(document).on('click', '.ball', function () {
-		auditMarble(this, false);
 	});
 
 	$('#submit').click(function(){
@@ -593,138 +456,138 @@ $(document).on('ready', function () {
        ws.send(JSON.stringify(obj));
     });
 
- //    $(document).click(function(e){  //click the button
-	// 	var clickid=$(e.target).attr('id');
-	// 	if (clickid.indexOf("ac_accept_")>=0) {		// accept the account
- //            var obj = {
- //                type: 'ac_accept',
- //                ac_id: clickid.substr(10)
- //            };
- //            console.log('accepting user, sending', obj);
- //            ws.send(JSON.stringify(obj));
- //            $('#ac_check_noti_' + clickid.substr(10)).remove();
- //            $('#user1wrap').append("<p>Account Checker Accepted!</p>");
- //        }
+    $(document).click(function(e){  //click the button
+		var clickid=$(e.target).attr('id');
+		if (clickid.indexOf("ac_accept_")>=0) {		// accept the account
+            var obj = {
+                type: 'ac_accept',
+                ac_id: clickid.substr(10)
+            };
+            console.log('accepting user, sending', obj);
+            ws.send(JSON.stringify(obj));
+            $('#ac_check_noti_' + clickid.substr(10)).remove();
+            $('#user1wrap').append("<p>Account Checker Accepted!</p>");
+        }
 
- //        else if (clickid.indexOf("ac_decline_")>=0) {		// decline the account
-	// 		var obj = {
-	// 			type: 'ac_decline',
-	// 			ac_id:clickid.substr(11)
-	// 		};
-	// 		console.log('declining user, sending', obj);
-	// 		ws.send(JSON.stringify(obj));
- //            $('#ac_check_noti_' + clickid.substr(11)).remove();
- //            $('#user1wrap').append("<p>Account Checker Declined!</p>");
-	// 	}
+        else if (clickid.indexOf("ac_decline_")>=0) {		// decline the account
+			var obj = {
+				type: 'ac_decline',
+				ac_id:clickid.substr(11)
+			};
+			console.log('declining user, sending', obj);
+			ws.send(JSON.stringify(obj));
+            $('#ac_check_noti_' + clickid.substr(11)).remove();
+            $('#user1wrap').append("<p>Account Checker Declined!</p>");
+		}
 
-	// 	else if (clickid.indexOf("actra_accept_")>=0) {		// accept the account trade
-	// 		var obj ={
-	// 			type: 'actra_accept',
-	// 			ac_id: clickid.substr(13)
-	// 		};
-	// 		console.log('accepting account trade, sending', obj);
-	// 		ws.send(JSON.stringify(obj));
-	// 		$('#actranoti_' + clickid.substr(13)).remove();
- //            $('#user1wrap').append("<p>Account trade Checker Accepted!</p>");
-	// 	}
+		else if (clickid.indexOf("actra_accept_")>=0) {		// accept the account trade
+			var obj ={
+				type: 'actra_accept',
+				ac_id: clickid.substr(13)
+			};
+			console.log('accepting account trade, sending', obj);
+			ws.send(JSON.stringify(obj));
+			$('#actranoti_' + clickid.substr(13)).remove();
+            $('#user1wrap').append("<p>Account trade Checker Accepted!</p>");
+		}
 
-	// 	else if (clickid.indexOf("actra_decline_")>=0) {
- //            var obj = {
- //                type: 'actra_decline',
- //                ac_id:clickid.substr(14)
- //            };
- //            console.log('declining account trade, sending', obj);
- //            ws.send(JSON.stringify(obj));
- //            $('#actranoti_' + clickid.substr(14)).remove();
- //            $('#user1wrap').append("<p>Account trade Checker Declined!</p>");
-	// 	}
+		else if (clickid.indexOf("actra_decline_")>=0) {
+            var obj = {
+                type: 'actra_decline',
+                ac_id:clickid.substr(14)
+            };
+            console.log('declining account trade, sending', obj);
+            ws.send(JSON.stringify(obj));
+            $('#actranoti_' + clickid.substr(14)).remove();
+            $('#user1wrap').append("<p>Account trade Checker Declined!</p>");
+		}
 
-	// 	else if (clickid.indexOf("acben_accept_")>=0){
- //            var obj ={
- //                type: 'acben_accept',
- //                ac_id: clickid.substr(13)
- //            };
- //            console.log('accepting account benchmark, sending', obj);
- //            ws.send(JSON.stringify(obj));
- //            $('#acbennoti_' + clickid.substr(13)).remove();
- //            $('#user1wrap').append("<p>Account Benchmark Checker Accepted!</p>");
-	// 	}
+		else if (clickid.indexOf("acben_accept_")>=0){
+            var obj ={
+                type: 'acben_accept',
+                ac_id: clickid.substr(13)
+            };
+            console.log('accepting account benchmark, sending', obj);
+            ws.send(JSON.stringify(obj));
+            $('#acbennoti_' + clickid.substr(13)).remove();
+            $('#user1wrap').append("<p>Account Benchmark Checker Accepted!</p>");
+		}
 
-	// 	else if (clickid.indexOf("acben_decline_")>=0){
- //            var obj = {
- //                type: 'acben_decline',
- //                ac_id:clickid.substr(14)
- //            };
- //            console.log('declining account benchmark, sending', obj);
- //            ws.send(JSON.stringify(obj));
- //            $('#acbennoti_' + clickid.substr(14)).remove();
- //            $('#user1wrap').append("<p>Account Benchmark Checker Declined!</p>");
-	// 	}
+		else if (clickid.indexOf("acben_decline_")>=0){
+            var obj = {
+                type: 'acben_decline',
+                ac_id:clickid.substr(14)
+            };
+            console.log('declining account benchmark, sending', obj);
+            ws.send(JSON.stringify(obj));
+            $('#acbennoti_' + clickid.substr(14)).remove();
+            $('#user1wrap').append("<p>Account Benchmark Checker Declined!</p>");
+		}
 
-	// 	else if (clickid.indexOf("bench_accept_")>=0) {
- //            var obj ={
- //                type: 'bench_accept',
- //                id: clickid.substr(13)
- //            };
- //            console.log('accepting benchmarks, sending', obj);
- //            ws.send(JSON.stringify(obj));
- //            $('#benchnoti_' + clickid.substr(13)).remove();
- //            $('#user1wrap').append("<p>Benchmarks Checker Accepted!</p>");
-	// 	}
+		else if (clickid.indexOf("bench_accept_")>=0) {
+            var obj ={
+                type: 'bench_accept',
+                id: clickid.substr(13)
+            };
+            console.log('accepting benchmarks, sending', obj);
+            ws.send(JSON.stringify(obj));
+            $('#benchnoti_' + clickid.substr(13)).remove();
+            $('#user1wrap').append("<p>Benchmarks Checker Accepted!</p>");
+		}
 
-	// 	else if (clickid.indexOf("bench_decline_")>=0) {
- //            var obj = {
- //                type: 'bench_decline',
- //                id:clickid.substr(14)
- //            };
- //            console.log('declining benchmarks, sending', obj);
- //            ws.send(JSON.stringify(obj));
- //            $('#benchnoti_' + clickid.substr(14)).remove();
- //            $('#user1wrap').append("<p>Benchmarks Checker Declined!</p>");
-	// 	}
+		else if (clickid.indexOf("bench_decline_")>=0) {
+            var obj = {
+                type: 'bench_decline',
+                id:clickid.substr(14)
+            };
+            console.log('declining benchmarks, sending', obj);
+            ws.send(JSON.stringify(obj));
+            $('#benchnoti_' + clickid.substr(14)).remove();
+            $('#user1wrap').append("<p>Benchmarks Checker Declined!</p>");
+		}
 
-	// 	else if (clickid.indexOf("del_bench")>=0){
-	// 		var delid=clickid.substr(9);
-	// 		$("#benchnoti_"+delid).remove();
-	// 		$('#user1wrap').append("<p>Benchmark "+delid+" deleted!</p>");	
-	// 	}
+		else if (clickid.indexOf("del_bench")>=0){
+			var delid=clickid.substr(9);
+			$("#benchnoti_"+delid).remove();
+			$('#user1wrap').append("<p>Benchmark "+delid+" deleted!</p>");	
+		}
 
-	// 	else if (clickid.indexOf("del_acben")>=0){
-	// 		var delid=clickid.substr(9);
- //            var obj = {
- //                type: 'know_new_record',
- //                table_name: 'ac_benchmark',
- //                id: delid
- //            };
- //            ws.send(JSON.stringify(obj));
-	// 		$("#acbennoti_"+delid).remove();
-	// 		$('#user1wrap').append("<p>Ac_benchmark "+delid+" deleted!</p>");	
-	// 	}
+		else if (clickid.indexOf("del_acben")>=0){
+			var delid=clickid.substr(9);
+            var obj = {
+                type: 'know_new_record',
+                table_name: 'ac_benchmark',
+                id: delid
+            };
+            ws.send(JSON.stringify(obj));
+			$("#acbennoti_"+delid).remove();
+			$('#user1wrap').append("<p>Ac_benchmark "+delid+" deleted!</p>");	
+		}
 
-	// 	else if (clickid.indexOf("del_actra")>=0){
-	// 		var delid=clickid.substr(9);
-	// 		var obj = {
-	// 			type: 'know_new_record',
-	// 			table_name: 'ac_trade',
-	// 			id: delid
-	// 		};
- //            ws.send(JSON.stringify(obj));
-	// 		$("#actranoti_"+delid).remove();
-	// 		$('#user1wrap').append("<p>Ac_Trade_setup "+delid+" deleted!</p>");	
-	// 	}
+		else if (clickid.indexOf("del_actra")>=0){
+			var delid=clickid.substr(9);
+			var obj = {
+				type: 'know_new_record',
+				table_name: 'ac_trade',
+				id: delid
+			};
+            ws.send(JSON.stringify(obj));
+			$("#actranoti_"+delid).remove();
+			$('#user1wrap').append("<p>Ac_Trade_setup "+delid+" deleted!</p>");	
+		}
 
-	// 	else if (clickid.indexOf("del_ac")>=0){
-	// 		var delid=clickid.substr(6);
- //            var obj = {
- //                type: 'know_new_record',
- //                table_name: 'account',
- //                id: delid
- //            };
- //            ws.send(JSON.stringify(obj));
-	// 		$("#acnoti_"+delid).remove();
-	// 		$('#user1wrap').append("<p>Account "+delid+" deleted!</p>");	
-	// 	}
-	// });
+		else if (clickid.indexOf("del_ac")>=0){
+			var delid=clickid.substr(6);
+            var obj = {
+                type: 'know_new_record',
+                table_name: 'account',
+                id: delid
+            };
+            ws.send(JSON.stringify(obj));
+			$("#acnoti_"+delid).remove();
+			$('#user1wrap').append("<p>Account "+delid+" deleted!</p>");	
+		}
+	});
 
 	function auditMarble(that, open) {
 		var marble_id = $(that).attr('id');
